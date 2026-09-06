@@ -11,7 +11,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, isAdmin, onSelectTa
   return (
     <aside
       id="main-sidebar"
-      className="fixed left-0 top-20 bottom-0 w-64 bg-white border-r border-[#f0e6e7] shadow-[0_1px_8px_rgba(0,0,0,0.02)] z-40 hidden md:flex flex-col justify-between p-4"
+      className="fixed left-0 top-20 bottom-0 w-64 bg-white border-r border-[#f0e6e7] shadow-[0_1px_8px_rgba(0,0,0,0.02)] z-40 hidden lg:flex flex-col justify-between p-4"
     >
       <div className="flex flex-col gap-4">
         <div className="px-2 pt-1">
@@ -47,6 +47,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, isAdmin, onSelectTa
           >
             <span className="material-symbols-outlined text-[20px]">history_edu</span>
             <span>Roster Kehadiran</span>
+          </button>
+
+          <button
+            id="sidebar-btn-recovery"
+            type="button"
+            onClick={() => onSelectTab('unduh-ulang-sertifikat')}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-xs font-semibold text-left ${
+              activeTab === 'unduh-ulang-sertifikat'
+                ? 'bg-[#5a0f18] text-white shadow-sm'
+                : 'text-[#534344] hover:bg-[#f6f1f1] hover:text-[#201112]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[20px]">download_for_offline</span>
+            <span>Unduh Ulang Sertifikat</span>
           </button>
 
           <button

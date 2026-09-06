@@ -1,4 +1,11 @@
-import type { AttendanceRecord, PublicAttendanceRecord } from '../types';
+import type {
+  AttendanceRecord,
+  CertificateVerificationResult,
+  EventRegistrationStatus,
+  ImportParticipantInput,
+  ImportParticipantResult,
+  PublicAttendanceRecord,
+} from '../types';
 import { isSupabaseConfigured, supabase } from './supabase';
 
 type AttendanceRow = {
@@ -46,6 +53,80 @@ export async function getAttendanceCount() {
   const { data, error } = await supabase.rpc('attendance_count');
   if (error) throw error;
   return Number(data || 0);
+}
+
+export async function getEventRegistrationStatus(): Promise<EventRegistrationStatus> {
+  requireConfiguration();
+  const { data, error } = await supabase.rpc('get_event_registration_status');
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as {
+    is_open: boolean;
+    accepting: boolean;
+    opens_at: string | null;
+    closes_at: string | null;
+  } | null;
+  return {
+    isOpen: Boolean(row?.is_open),
+    accepting: Boolean(row?.accepting),
+    opensAt: row?.opens_at ?? null,
+    closesAt: row?.closes_at ?? null,
+  };
+}
+
+export async function updateEventRegistrationStatus(input: EventRegistrationStatus) {
+  requireConfiguration();
+  const { error } = await supabase.rpc('update_event_registration_status', {
+    p_is_open: input.isOpen,
+    p_opens_at: input.opensAt,
+    p_closes_at: input.closesAt,
+  });
+  if (error) throw error;
+}
+
+export async function recoverCertificate(email: string, serial: string) {
+  requireConfiguration();
+  const { data, error } = await supabase.rpc('recover_certificate', {
+    p_email: email.trim().toLowerCase(),
+    p_serial: serial.trim().toUpperCase(),
+  });
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as AttendanceRow | null;
+  if (!row) throw new Error('Data sertifikat tidak ditemukan. Periksa kembali email dan nomor registrasi.');
+  return mapAttendance(row);
+}
+
+export async function verifyCertificate(id: string, serial: string): Promise<CertificateVerificationResult | null> {
+  requireConfiguration();
+  const { data, error } = await supabase.rpc('verify_certificate', {
+    p_id: id,
+    p_serial: serial.trim().toUpperCase(),
+  });
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as {
+    id: string;
+    name: string;
+    institution: string;
+    certificate_serial: string;
+    status: 'Tervalidasi' | 'Menunggu';
+    issued_at: string;
+  } | null;
+  if (!row) return null;
+  return {
+    id: row.id,
+    name: row.name,
+    instansi: row.institution,
+    serial: row.certificate_serial,
+    status: row.status,
+    issuedAt: row.issued_at,
+  };
+}
+
+export async function importAttendanceRows(rows: ImportParticipantInput[]): Promise<ImportParticipantResult> {
+  requireConfiguration();
+  const { data, error } = await supabase.rpc('import_attendance_rows', { p_rows: rows });
+  if (error) throw error;
+  const result = (Array.isArray(data) ? data[0] : data) as { inserted_count: number; skipped_count: number } | null;
+  return { inserted: Number(result?.inserted_count || 0), skipped: Number(result?.skipped_count || 0) };
 }
 
 export async function listAttendance() {

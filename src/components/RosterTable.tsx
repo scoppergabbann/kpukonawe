@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AttendanceRecord, PublicAttendanceRecord } from '../types';
+
+const PUBLIC_PAGE_SIZE = 10;
 
 interface RosterTableProps {
   records: AttendanceRecord[];
@@ -26,6 +28,8 @@ export const RosterTable: React.FC<RosterTableProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'Semua' | AttendanceRecord['status']>('Semua');
+  const [publicQuery, setPublicQuery] = useState('');
+  const [publicPage, setPublicPage] = useState(1);
 
   const filteredRecords = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -36,6 +40,24 @@ export const RosterTable: React.FC<RosterTableProps> = ({
       return matchesQuery && matchesStatus;
     });
   }, [query, records, statusFilter]);
+
+  const filteredPublicRecords = useMemo(() => {
+    const keyword = publicQuery.trim().toLowerCase();
+    if (!keyword) return publicRecords;
+    return publicRecords.filter((record) =>
+      [record.name, record.instansi].some((value) => value.toLowerCase().includes(keyword))
+    );
+  }, [publicQuery, publicRecords]);
+
+  const publicPageCount = Math.max(1, Math.ceil(filteredPublicRecords.length / PUBLIC_PAGE_SIZE));
+  const paginatedPublicRecords = useMemo(() => {
+    const start = (publicPage - 1) * PUBLIC_PAGE_SIZE;
+    return filteredPublicRecords.slice(start, start + PUBLIC_PAGE_SIZE);
+  }, [filteredPublicRecords, publicPage]);
+
+  useEffect(() => {
+    setPublicPage((current) => Math.min(current, publicPageCount));
+  }, [publicPageCount]);
 
   return (
     <div
@@ -143,6 +165,25 @@ export const RosterTable: React.FC<RosterTableProps> = ({
         </div>
       )}
 
+      {!isAdmin && (
+        <div className="mb-4">
+          <label className="relative block">
+            <span className="sr-only">Cari nama peserta atau instansi</span>
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#75777d]">search</span>
+            <input
+              type="search"
+              value={publicQuery}
+              onChange={(event) => {
+                setPublicQuery(event.target.value);
+                setPublicPage(1);
+              }}
+              placeholder="Cari nama peserta atau instansi..."
+              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
+            />
+          </label>
+        </div>
+      )}
+
       {/* Responsive Table */}
       <div className="overflow-x-auto">
         {isAdmin ? (
@@ -228,14 +269,16 @@ export const RosterTable: React.FC<RosterTableProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0e6e7]">
-              {publicRecords.length === 0 ? (
+              {paginatedPublicRecords.length === 0 ? (
                 <tr>
                   <td colSpan={2} className="py-8 text-center text-[#75777d]">
-                    Belum ada peserta yang tercatat.
+                    {publicRecords.length === 0
+                      ? 'Belum ada peserta yang tercatat.'
+                      : 'Nama peserta atau instansi tidak ditemukan.'}
                   </td>
                 </tr>
               ) : (
-                publicRecords.map((record) => (
+                paginatedPublicRecords.map((record) => (
                   <tr key={record.id} className="hover:bg-[#f6f1f1]/60 transition-colors">
                     <td className="py-3.5 px-4 font-bold text-[#5a0f18] text-xs">{record.name}</td>
                     <td className="py-3.5 px-4 text-[#201112]">{record.instansi}</td>
@@ -246,6 +289,38 @@ export const RosterTable: React.FC<RosterTableProps> = ({
           </table>
         )}
       </div>
+
+      {!isAdmin && filteredPublicRecords.length > 0 && (
+        <div className="mt-4 flex flex-col gap-3 border-t border-[#f0e6e7] pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-[#534344]">
+            Menampilkan {(publicPage - 1) * PUBLIC_PAGE_SIZE + 1}–{Math.min(publicPage * PUBLIC_PAGE_SIZE, filteredPublicRecords.length)} dari {filteredPublicRecords.length} peserta
+          </p>
+          <nav className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:flex sm:w-auto sm:gap-2" aria-label="Paginasi daftar peserta">
+            <button
+              type="button"
+              disabled={publicPage === 1}
+              onClick={() => setPublicPage((page) => Math.max(1, page - 1))}
+              className="inline-flex items-center justify-center gap-0.5 whitespace-nowrap rounded-lg border border-[#d5cbcd] bg-white px-2 py-2 text-[11px] font-semibold text-[#5a0f18] transition-colors hover:bg-[#f6f1f1] disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1 sm:px-3 sm:text-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+              <span className="hidden min-[360px]:inline">Sebelumnya</span>
+            </button>
+            <span className="whitespace-nowrap text-center text-[11px] font-medium text-[#534344] sm:min-w-24 sm:text-xs">
+              <span className="min-[360px]:hidden">{publicPage}/{publicPageCount}</span>
+              <span className="hidden min-[360px]:inline">Halaman {publicPage} dari {publicPageCount}</span>
+            </span>
+            <button
+              type="button"
+              disabled={publicPage === publicPageCount}
+              onClick={() => setPublicPage((page) => Math.min(publicPageCount, page + 1))}
+              className="inline-flex items-center justify-center gap-0.5 whitespace-nowrap rounded-lg border border-[#d5cbcd] bg-white px-2 py-2 text-[11px] font-semibold text-[#5a0f18] transition-colors hover:bg-[#f6f1f1] disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1 sm:px-3 sm:text-xs"
+            >
+              <span className="hidden min-[360px]:inline">Berikutnya</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
+          </nav>
+        </div>
+      )}
 
       {/* Card Ekspor CSV pada Bagian Log Presensi Peserta */}
       <div

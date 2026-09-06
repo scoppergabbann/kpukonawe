@@ -11,6 +11,7 @@ interface AttendanceFormProps {
   setSerial: (val: string) => void;
   date: string;
   isSubmitting: boolean;
+  registrationOpen: boolean;
   onSubmit: () => void;
   onReset: () => void;
 }
@@ -26,6 +27,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
   setSerial,
   date,
   isSubmitting,
+  registrationOpen,
   onSubmit,
   onReset,
 }) => {
@@ -68,7 +70,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
           id="online-status-pill"
           className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#5a0f18]/10 text-[#5a0f18] font-mono"
         >
-          ONLINE
+          {registrationOpen ? 'DIBUKA' : 'DITUTUP'}
         </span>
       </div>
 
@@ -88,6 +90,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
               id="inputName"
               type="text"
               required
+              disabled={!registrationOpen}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: Dr. Budi Santoso, M.Kom."
@@ -111,6 +114,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
               id="inputEmail"
               type="email"
               required
+              disabled={!registrationOpen}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -144,6 +148,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
               id="inputInstansi"
               type="text"
               required
+              disabled={!registrationOpen}
               value={instansi}
               onChange={(e) => setInstansi(e.target.value)}
               placeholder="Contoh: Universitas Indonesia / KPU Provinsi / Bawaslu"
@@ -152,7 +157,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <div className="flex items-center justify-between mb-1">
               <label
@@ -202,13 +207,13 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
           <button
             id="btnSubmitPresensi"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !registrationOpen}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#5a0f18] hover:bg-[#3d080e] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:cursor-wait disabled:opacity-65"
           >
             <span className={`material-symbols-outlined text-[18px] ${isSubmitting ? 'animate-spin' : ''}`}>
               {isSubmitting ? 'sync' : 'verified_user'}
             </span>
-            <span>{isSubmitting ? 'Menyimpan Presensi...' : 'Kirim Presensi & Unduh Sertifikat'}</span>
+            <span>{!registrationOpen ? 'Masa Presensi Ditutup' : isSubmitting ? 'Menyimpan Presensi...' : 'Kirim Presensi & Unduh Sertifikat'}</span>
           </button>
 
           <button

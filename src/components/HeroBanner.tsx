@@ -57,7 +57,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
         </div>
 
         {/* Quick Stat Tiles */}
-        <div className="flex items-center gap-3 sm:gap-4 pt-2 lg:pt-0 shrink-0">
+        <div className="flex flex-col items-stretch gap-3 pt-2 min-[360px]:flex-row min-[360px]:items-center sm:gap-4 lg:pt-0 lg:shrink-0">
           <div
             id="stat-registered-attendees"
             className="p-3.5 bg-[#f6f1f1] rounded-xl flex items-center gap-3 border border-[#5a0f18]/10 shadow-xs"

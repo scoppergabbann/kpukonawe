@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="font-bold text-base tracking-tight text-[#5a0f18]">
                   KPU Konawe
                 </span>
-                <span className="text-base font-normal text-[#534344]">
+                <span className="hidden text-base font-normal text-[#534344] sm:inline">
                   &amp; E-Sertifikat
                 </span>
               </div>
@@ -113,6 +113,21 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            id="btnHeaderCertificateRecovery"
+            type="button"
+            onClick={() => onSelectTab('unduh-ulang-sertifikat')}
+            className={`flex h-9 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-all sm:px-3 ${
+              activeTab === 'unduh-ulang-sertifikat'
+                ? 'border-[#5a0f18] bg-[#5a0f18] text-white shadow-sm'
+                : 'border-[#5a0f18]/20 bg-white text-[#5a0f18] hover:bg-[#5a0f18]/10'
+            }`}
+            title="Unduh ulang sertifikat"
+            aria-label="Buka halaman unduh ulang sertifikat"
+          >
+            <span className="material-symbols-outlined block text-[19px] leading-none" aria-hidden="true">download_for_offline</span>
+            <span className="hidden xl:inline">Unduh Ulang</span>
+          </button>
           <div
             id="date-display-badge"
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f6f1f1] text-[#534344] border border-[#f0e6e7] text-xs font-medium"

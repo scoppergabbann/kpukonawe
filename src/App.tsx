@@ -11,24 +11,42 @@ import { Toast } from './components/Toast';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { ConfirmResetModal } from './components/ConfirmResetModal';
 import { ParticipantEditorModal } from './components/ParticipantEditorModal';
-import { AttendanceRecord, ActiveNavTab, PublicAttendanceRecord, ToastState } from './types';
+import { CertificateRecovery } from './components/CertificateRecovery';
+import { CertificateVerification } from './components/CertificateVerification';
+import { AdminToolsPanel } from './components/AdminToolsPanel';
+import {
+  AttendanceRecord,
+  ActiveNavTab,
+  CertificateVerificationResult,
+  EventRegistrationStatus,
+  ImportParticipantInput,
+  PublicAttendanceRecord,
+  ToastState,
+} from './types';
 import {
   clearAttendance,
   deleteAttendanceRecord,
   getAttendanceCount,
+  getEventRegistrationStatus,
+  importAttendanceRows,
   isCurrentUserAdmin,
   listAttendance,
   listPublicAttendance,
+  recoverCertificate,
   signInAdmin,
   signOutAdmin,
   submitAttendance,
   updateAttendanceRecord,
+  updateEventRegistrationStatus,
+  verifyCertificate,
 } from './lib/supabase-api';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveNavTab>(
-    'presensi-dan-unduh-sertifikat'
+    window.location.hash === '#unduh-ulang-sertifikat'
+      ? 'unduh-ulang-sertifikat'
+      : 'presensi-dan-unduh-sertifikat'
   );
   const [bottomTab, setBottomTab] = useState<'records' | 'guide'>('records');
 
@@ -45,6 +63,10 @@ export default function App() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [publicRecords, setPublicRecords] = useState<PublicAttendanceRecord[]>([]);
   const [participantCount, setParticipantCount] = useState(0);
+  const [eventStatus, setEventStatus] = useState<EventRegistrationStatus>({ isOpen: false, accepting: false, opensAt: null, closesAt: null });
+  const [verificationResult, setVerificationResult] = useState<CertificateVerificationResult | null>(null);
+  const [hasVerificationRequest, setHasVerificationRequest] = useState(false);
+  const [isVerifyingCertificate, setIsVerifyingCertificate] = useState(false);
 
   // Admin Auth State
   const [isAdmin, setIsAdmin] = useState(false);
@@ -83,13 +105,38 @@ export default function App() {
   }, [toast.show]);
 
   useEffect(() => {
+    const syncPageWithUrl = () => {
+      setActiveTab((currentTab) => {
+        if (window.location.hash === '#unduh-ulang-sertifikat') {
+          return 'unduh-ulang-sertifikat';
+        }
+        return currentTab === 'unduh-ulang-sertifikat'
+          ? 'presensi-dan-unduh-sertifikat'
+          : currentTab;
+      });
+    };
+
+    window.addEventListener('hashchange', syncPageWithUrl);
+    window.addEventListener('popstate', syncPageWithUrl);
+    return () => {
+      window.removeEventListener('hashchange', syncPageWithUrl);
+      window.removeEventListener('popstate', syncPageWithUrl);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isSupabaseConfigured) return;
 
     const refresh = async () => {
       try {
-        const [count, admin] = await Promise.all([getAttendanceCount(), isCurrentUserAdmin()]);
+        const [count, admin, registrationStatus] = await Promise.all([
+          getAttendanceCount(),
+          isCurrentUserAdmin(),
+          getEventRegistrationStatus(),
+        ]);
         setParticipantCount(count);
         setIsAdmin(admin);
+        setEventStatus(registrationStatus);
         if (admin) {
           setRecords(await listAttendance());
           setPublicRecords([]);
@@ -104,7 +151,27 @@ export default function App() {
 
     void refresh();
     const { data: listener } = supabase.auth.onAuthStateChange(() => { void refresh(); });
-    return () => listener.subscription.unsubscribe();
+    const statusTimer = window.setInterval(() => {
+      void getEventRegistrationStatus().then(setEventStatus).catch(() => undefined);
+    }, 30_000);
+    return () => {
+      listener.subscription.unsubscribe();
+      window.clearInterval(statusTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const params = new URLSearchParams(window.location.search);
+    const verificationId = params.get('verify');
+    const verificationSerial = params.get('serial');
+    if (!verificationId || !verificationSerial) return;
+    setHasVerificationRequest(true);
+    setIsVerifyingCertificate(true);
+    void verifyCertificate(verificationId, verificationSerial)
+      .then(setVerificationResult)
+      .catch(() => setVerificationResult(null))
+      .finally(() => setIsVerifyingCertificate(false));
   }, []);
 
   // Form submit: Kirim Presensi
@@ -140,6 +207,40 @@ export default function App() {
     setSerial('');
     setIssuedRecord(null);
     showToast('Form Direset', 'Formulir dikosongkan dan unduhan sertifikat dikunci kembali.', 'info');
+  };
+
+  const handleRecoverCertificate = async (recoveryEmail: string, recoverySerial: string) => {
+    const recovered = await recoverCertificate(recoveryEmail, recoverySerial);
+    setName(recovered.name);
+    setEmail(recovered.email);
+    setInstansi(recovered.instansi);
+    setSerial(recovered.serial);
+    setIssuedRecord(recovered);
+    setActiveTab('presensi-dan-unduh-sertifikat');
+    window.history.pushState({}, '', `${window.location.pathname}${window.location.search}`);
+    showToast('Sertifikat Ditemukan', `Sertifikat ${recovered.name} siap diunduh kembali.`);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+    return recovered;
+  };
+
+  const handleSaveEventStatus = async (status: EventRegistrationStatus) => {
+    try {
+      await updateEventRegistrationStatus(status);
+      const refreshed = await getEventRegistrationStatus();
+      setEventStatus(refreshed);
+      showToast('Masa Presensi Diperbarui', refreshed.isOpen ? 'Formulir presensi sekarang dibuka.' : 'Formulir presensi sekarang ditutup.');
+    } catch (error) {
+      showToast('Pengaturan Gagal Disimpan', error instanceof Error ? error.message : 'Supabase menolak perubahan.', 'error');
+    }
+  };
+
+  const handleImportParticipants = async (rows: ImportParticipantInput[]) => {
+    const result = await importAttendanceRows(rows);
+    const [adminRecords, count] = await Promise.all([listAttendance(), getAttendanceCount()]);
+    setRecords(adminRecords);
+    setParticipantCount(count);
+    showToast('Impor Peserta Selesai', `${result.inserted} peserta ditambahkan dan ${result.skipped} baris dilewati.`);
+    return result;
   };
 
   const updateDraft = (
@@ -219,25 +320,31 @@ export default function App() {
       'No Seri Sertifikat',
       'Status',
     ];
+
+    const escapeCSVCell = (value: string) =>
+      `"${value.replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
+
     const rows = data.map((r) => [
-      `"${r.timestamp}"`,
-      `"${r.name}"`,
-      `"${r.instansi}"`,
-      `"${r.email}"`,
-      `"${r.serial}"`,
-      `"${r.status}"`,
+      // Hilangkan koma pemisah tanggal/jam agar Excel tidak menggeser kolom berikutnya.
+      escapeCSVCell(r.timestamp.replace(/,\s*/g, ' ')),
+      escapeCSVCell(r.name),
+      escapeCSVCell(r.instansi),
+      escapeCSVCell(r.email),
+      escapeCSVCell(r.serial),
+      escapeCSVCell(r.status),
     ]);
-    const csvContent =
-      'data:text/csv;charset=utf-8,\uFEFF' +
-      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = '\uFEFF' +
+      [headers.map(escapeCSVCell).join(','), ...rows.map((row) => row.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', objectUrl);
     link.setAttribute(
       'download',
       `Rekap_Presensi_KPU_Konawe_${new Date().toISOString().slice(0, 10)}.csv`
     );
     link.click();
+    URL.revokeObjectURL(objectUrl);
     showToast(
       'Ekspor CSV Selesai',
       'Data presensi berhasil diunduh dalam format spreadsheet CSV.'
@@ -363,13 +470,26 @@ export default function App() {
   // Navigation tab handler
   const handleSelectTab = (tab: ActiveNavTab) => {
     setActiveTab(tab);
-    if (tab === 'presensi-dan-unduh-sertifikat') {
+    const baseUrl = `${window.location.pathname}${window.location.search}`;
+    if (tab === 'unduh-ulang-sertifikat') {
+      window.history.pushState({}, '', `${baseUrl}#unduh-ulang-sertifikat`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (tab === 'presensi-dan-unduh-sertifikat') {
+      if (window.location.hash === '#unduh-ulang-sertifikat') {
+        window.history.pushState({}, '', baseUrl);
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tab === 'riwayat-kehadiran') {
+      if (window.location.hash === '#unduh-ulang-sertifikat') {
+        window.history.pushState({}, '', baseUrl);
+      }
       setBottomTab('records');
       const el = document.getElementById('bottom-tab-section');
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     } else if (tab === 'informasi-kegiatan') {
+      if (window.location.hash === '#unduh-ulang-sertifikat') {
+        window.history.pushState({}, '', baseUrl);
+      }
       setBottomTab('guide');
       const el = document.getElementById('bottom-tab-section');
       if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -377,7 +497,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf9f9] text-[#201112] relative">
+    <div className="min-h-screen overflow-x-hidden bg-[#fbf9f9] text-[#201112] relative">
       {/* Watermark Logo KPU RI dengan transparency 60% */}
       <div
         id="kpu-watermark-bg"
@@ -412,7 +532,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <div className="md:pl-64 relative z-10">
+      <div className="lg:pl-64 relative z-10">
         <main className="pt-24 px-4 sm:px-6 lg:px-8 pb-16 w-full max-w-[1600px] mx-auto">
           {!isSupabaseConfigured && (
             <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950" role="alert">
@@ -420,6 +540,23 @@ export default function App() {
               <p className="mt-1 text-xs">Tambahkan Project URL dan publishable key ke file <code>.env.local</code> untuk mengaktifkan presensi, login admin, dan Storage.</p>
             </div>
           )}
+          {activeTab === 'unduh-ulang-sertifikat' ? (
+            <div className="mx-auto w-full max-w-3xl py-4 sm:py-10">
+              <button
+                type="button"
+                onClick={() => handleSelectTab('presensi-dan-unduh-sertifikat')}
+                className="mb-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#5a0f18]/15 bg-white px-4 py-2.5 text-sm font-semibold text-[#5a0f18] shadow-sm transition-colors hover:bg-[#f6f1f1]"
+              >
+                <span className="material-symbols-outlined text-[19px]" aria-hidden="true">arrow_back</span>
+                Kembali ke Presensi
+              </button>
+              <CertificateRecovery onRecover={handleRecoverCertificate} />
+              <p className="mt-4 text-center text-sm leading-relaxed text-[#534344]">
+                Setelah sertifikat ditemukan, Anda akan kembali ke halaman utama untuk mengunduh PDF atau JPG.
+              </p>
+            </div>
+          ) : (
+            <>
           {/* Hero Banner */}
           <HeroBanner attendeeCount={participantCount} />
 
@@ -438,6 +575,7 @@ export default function App() {
                 setSerial={setSerial}
                 date={date}
                 isSubmitting={isSubmitting}
+                registrationOpen={eventStatus.accepting}
                 onSubmit={handleSubmitPresensi}
                 onReset={handleResetForm}
               />
@@ -451,6 +589,7 @@ export default function App() {
                 ref={certCanvasRef}
                 name={issuedRecord?.name ?? name}
                 serial={issuedRecord?.serial ?? serial}
+                verificationId={issuedRecord?.id}
                 canDownload={Boolean(issuedRecord)}
                 isAdmin={isAdmin}
                 onShowToast={showToast}
@@ -458,6 +597,16 @@ export default function App() {
               />
             </div>
           </div>
+
+          {isAdmin && (
+            <div className="mt-8">
+              <AdminToolsPanel
+                eventStatus={eventStatus}
+                onSaveEvent={handleSaveEventStatus}
+                onImport={handleImportParticipants}
+              />
+            </div>
+          )}
 
           {/* Bottom Tabs Section: Roster Table & Activity Guide */}
           <div id="bottom-tab-section" className="mt-12 flex flex-col gap-4">
@@ -473,7 +622,7 @@ export default function App() {
                     : 'bg-white text-[#534344] hover:text-[#201112] border border-[#f0e6e7]'
                 }`}
               >
-                Roster Data Presensi &amp; Rekap ({records.length})
+                Roster Data Presensi &amp; Rekap ({participantCount})
               </button>
 
               <button
@@ -510,6 +659,8 @@ export default function App() {
               <ActivityGuide />
             )}
           </div>
+            </>
+          )}
         </main>
       </div>
 
@@ -534,6 +685,17 @@ export default function App() {
         onClose={() => setManagedParticipant(null)}
         onSave={handleUpdateParticipant}
         onDelete={handleDeleteParticipant}
+      />
+
+      <CertificateVerification
+        isLoading={isVerifyingCertificate}
+        result={verificationResult}
+        hasVerificationRequest={hasVerificationRequest}
+        onClose={() => {
+          setHasVerificationRequest(false);
+          const cleanUrl = `${window.location.pathname}${window.location.hash}`;
+          window.history.replaceState({}, '', cleanUrl);
+        }}
       />
 
       {/* Floating Toast Notification */}

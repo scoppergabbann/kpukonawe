@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, useImperativeHandle } from 'react';
 import { jsPDF } from 'jspdf';
+import QRCode from 'qrcode';
 import {
   downloadCertificateTemplate,
   resetCertificateTemplate,
@@ -14,6 +15,7 @@ export interface CertificateCanvasHandle {
 interface CertificateCanvasProps {
   name: string;
   serial: string;
+  verificationId?: string;
   canDownload?: boolean;
   isAdmin?: boolean;
   onShowToast: (title: string, msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
@@ -23,6 +25,7 @@ interface CertificateCanvasProps {
 export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, CertificateCanvasProps>(({
   name,
   serial,
+  verificationId,
   canDownload = false,
   isAdmin = false,
   onShowToast,
@@ -33,7 +36,9 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   const [isCustomTemplate, setIsCustomTemplate] = useState(false);
   const [customTemplateName, setCustomTemplateName] = useState<string>('');
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [isQrReady, setIsQrReady] = useState(false);
   const imageRef = useRef<HTMLImageElement | null>(null);
+  const qrImageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Official high-res template image URL
@@ -312,6 +317,22 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
         ctx.restore();
       }
+
+      const qrImage = qrImageRef.current;
+      if (qrImage && recipientSerial) {
+        const qrSize = Math.round(112 * Math.min(scaleX, scaleY));
+        const qrX = Math.round(w - 178 * scaleX);
+        const qrY = Math.round(h - 180 * scaleY);
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(qrX - Math.round(8 * scaleX), qrY - Math.round(8 * scaleY), qrSize + Math.round(16 * scaleX), qrSize + Math.round(34 * scaleY));
+        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+        ctx.fillStyle = '#520b12';
+        ctx.font = `600 ${Math.round(9 * scaleY)}px "Plus Jakarta Sans", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('VERIFIKASI', qrX + qrSize / 2, qrY + qrSize + Math.round(16 * scaleY));
+        ctx.restore();
+      }
     },
     [name, serial]
   );
@@ -323,6 +344,26 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
     }
   }, [renderCertificateToCanvas]);
 
+  useEffect(() => {
+    if (!verificationId || !serial) {
+      qrImageRef.current = null;
+      setIsQrReady(false);
+      drawCertificate();
+      return;
+    }
+    setIsQrReady(false);
+    const verificationUrl = `${window.location.origin}${window.location.pathname}?verify=${encodeURIComponent(verificationId)}&serial=${encodeURIComponent(serial)}`;
+    void QRCode.toDataURL(verificationUrl, { width: 360, margin: 1, errorCorrectionLevel: 'M' }).then((dataUrl) => {
+      const qrImage = new Image();
+      qrImage.onload = () => {
+        qrImageRef.current = qrImage;
+        setIsQrReady(true);
+        drawCertificate();
+      };
+      qrImage.src = dataUrl;
+    });
+  }, [drawCertificate, verificationId, serial]);
+
   // Re-draw whenever inputs or template change
   useEffect(() => {
     drawCertificate();
@@ -330,7 +371,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle Ultra-HD JPG Download (rendered at 2x master resolution)
   const handleDownloadJPG = () => {
-    if (!canDownload) {
+    if (!canDownload || !isQrReady) {
       onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan JPG dapat dibuka.', 'warning');
       return;
     }
@@ -363,8 +404,8 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle True 300 DPI Ultra-HD PDF Generation & Direct Download
   const handleDownloadPDF = async () => {
-    if (isExportingPDF || !canDownload) {
-      if (!canDownload) {
+    if (isExportingPDF || !canDownload || !isQrReady) {
+      if (!canDownload || !isQrReady) {
         onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan PDF dapat dibuka.', 'warning');
       }
       return;
@@ -531,14 +572,6 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
                 )}
               </button>
             )}
-
-            <span
-              id="signature-officer-badge"
-              className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#5a0f18]/10 text-[#5a0f18]"
-            >
-              <span className="material-symbols-outlined text-[15px]">verified</span>
-              <span>Tanda Tangan Ketua: Wike</span>
-            </span>
           </div>
         </div>
 
@@ -562,7 +595,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
             <button
               id="btnDownloadPDF"
               type="button"
-              disabled={isExportingPDF || !canDownload}
+              disabled={isExportingPDF || !canDownload || !isQrReady}
               onClick={handleDownloadPDF}
               title={canDownload ? 'Unduh sertifikat dalam format PDF' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5a0f18] hover:bg-[#3d080e] text-white text-xs font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
@@ -570,13 +603,13 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className={`material-symbols-outlined text-[18px] text-[#ffdcc3] ${isExportingPDF ? 'animate-spin' : ''}`}>
                 {isExportingPDF ? 'sync' : 'picture_as_pdf'}
               </span>
-              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
+              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload && !isQrReady ? 'Menyiapkan QR...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
             </button>
 
             <button
               id="btnDownloadJPG"
               type="button"
-              disabled={!canDownload}
+              disabled={!canDownload || !isQrReady}
               onClick={handleDownloadJPG}
               title={canDownload ? 'Unduh sertifikat dalam format JPG' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] text-xs font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
@@ -584,7 +617,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className="material-symbols-outlined text-[18px] text-[#5a0f18]">
                 image
               </span>
-              <span>{canDownload ? 'JPG' : 'JPG Terkunci'}</span>
+              <span>{canDownload && !isQrReady ? 'Menyiapkan QR...' : canDownload ? 'JPG' : 'JPG Terkunci'}</span>
             </button>
           </div>
 
