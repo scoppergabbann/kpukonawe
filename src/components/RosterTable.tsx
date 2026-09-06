@@ -1,10 +1,12 @@
-import React from 'react';
-import { AttendanceRecord } from '../types';
+import React, { useMemo, useState } from 'react';
+import { AttendanceRecord, PublicAttendanceRecord } from '../types';
 
 interface RosterTableProps {
   records: AttendanceRecord[];
+  publicRecords: PublicAttendanceRecord[];
   isAdmin: boolean;
   onSelectRecord: (record: AttendanceRecord) => void;
+  onManageRecord: (record: AttendanceRecord) => void;
   onExportCSV: () => void;
   onClearRecords: () => void;
   onOpenAdminLogin: () => void;
@@ -13,13 +15,28 @@ interface RosterTableProps {
 
 export const RosterTable: React.FC<RosterTableProps> = ({
   records,
+  publicRecords,
   isAdmin,
   onSelectRecord,
+  onManageRecord,
   onExportCSV,
   onClearRecords,
   onOpenAdminLogin,
   onLogoutAdmin,
 }) => {
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'Semua' | AttendanceRecord['status']>('Semua');
+
+  const filteredRecords = useMemo(() => {
+    const keyword = query.trim().toLowerCase();
+    return records.filter((record) => {
+      const matchesQuery = !keyword || [record.name, record.instansi, record.email, record.serial]
+        .some((value) => value.toLowerCase().includes(keyword));
+      const matchesStatus = statusFilter === 'Semua' || record.status === statusFilter;
+      return matchesQuery && matchesStatus;
+    });
+  }, [query, records, statusFilter]);
+
   return (
     <div
       id="tabContentRecords"
@@ -31,15 +48,10 @@ export const RosterTable: React.FC<RosterTableProps> = ({
             <h3 className="text-sm sm:text-base font-bold text-[#5a0f18]">
               Log Presensi Peserta &amp; Status Sertifikat
             </h3>
-            {isAdmin ? (
+            {isAdmin && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                 Admin Aktif
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold font-mono">
-                <span className="material-symbols-outlined text-[12px]">lock</span>
-                Mode Tamu
               </span>
             )}
           </div>
@@ -103,8 +115,37 @@ export const RosterTable: React.FC<RosterTableProps> = ({
         </div>
       </div>
 
+      {isAdmin && (
+        <div className="mb-4 grid grid-cols-1 sm:grid-cols-[1fr_190px] gap-3">
+          <label className="relative">
+            <span className="sr-only">Cari peserta</span>
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#75777d]">search</span>
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Cari nama, instansi, email, atau nomor..."
+              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
+            />
+          </label>
+          <label>
+            <span className="sr-only">Filter status sertifikat</span>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'Semua' | AttendanceRecord['status'])}
+              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
+            >
+              <option value="Semua">Semua status</option>
+              <option value="Tervalidasi">Tervalidasi</option>
+              <option value="Menunggu">Menunggu</option>
+            </select>
+          </label>
+        </div>
+      )}
+
       {/* Responsive Table */}
       <div className="overflow-x-auto">
+        {isAdmin ? (
         <table id="rosterTable" className="w-full text-left text-xs">
           <thead>
             <tr className="bg-[#f6f1f1] text-[#75777d] font-mono text-[11px] uppercase tracking-wider">
@@ -118,16 +159,18 @@ export const RosterTable: React.FC<RosterTableProps> = ({
             </tr>
           </thead>
           <tbody id="rosterTableBody" className="divide-y divide-[#f0e6e7]">
-            {records.length === 0 ? (
+            {filteredRecords.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-8 text-center text-[#75777d]">
                   {isAdmin
-                    ? 'Belum ada catatan presensi tersimpan di Supabase.'
-                    : 'Data pribadi peserta hanya dapat dilihat oleh Administrator KPU.'}
+                    ? records.length === 0
+                      ? 'Belum ada catatan presensi tersimpan di Supabase.'
+                      : 'Tidak ada peserta yang cocok dengan pencarian atau filter.'
+                    : ''}
                 </td>
               </tr>
             ) : (
-              records.map((rec) => (
+              filteredRecords.map((rec) => (
                 <tr
                   key={rec.id}
                   className="hover:bg-[#f6f1f1]/60 transition-colors"
@@ -152,22 +195,56 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onSelectRecord(rec)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-[#5a0f18] hover:text-white text-[#5a0f18] text-xs font-semibold transition-all cursor-pointer shadow-2xs"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">
-                        visibility
-                      </span>
-                      <span>Tampilkan</span>
-                    </button>
+                    <div className="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onSelectRecord(rec)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-[#5a0f18] hover:text-white text-[#5a0f18] text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">visibility</span>
+                        <span>Tampilkan</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onManageRecord(rec)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold transition-all cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">manage_accounts</span>
+                        <span>Kelola</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+        ) : (
+          <table id="publicRosterTable" className="w-full text-left text-xs">
+            <thead>
+              <tr className="bg-[#f6f1f1] text-[#75777d] font-mono text-[11px] uppercase tracking-wider">
+                <th className="py-3 px-4 rounded-l-lg">Nama Peserta</th>
+                <th className="py-3 px-4 rounded-r-lg">Instansi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#f0e6e7]">
+              {publicRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={2} className="py-8 text-center text-[#75777d]">
+                    Belum ada peserta yang tercatat.
+                  </td>
+                </tr>
+              ) : (
+                publicRecords.map((record) => (
+                  <tr key={record.id} className="hover:bg-[#f6f1f1]/60 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-[#5a0f18] text-xs">{record.name}</td>
+                    <td className="py-3.5 px-4 text-[#201112]">{record.instansi}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Card Ekspor CSV pada Bagian Log Presensi Peserta */}

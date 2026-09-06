@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 interface AdminLoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (email: string, password: string) => Promise<void>;
+  onSubmit: (username: string, password: string) => Promise<void>;
 }
 
 export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClose, onSubmit }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -20,8 +20,8 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
     setErrorMsg('');
     setIsSubmitting(true);
     try {
-      await onSubmit(email.trim().toLowerCase(), password);
-      setEmail('');
+      await onSubmit(username.trim().toLowerCase(), password);
+      setUsername('');
       setPassword('');
     } catch (error) {
       setErrorMsg(error instanceof Error ? error.message : 'Login administrator gagal.');
@@ -48,13 +48,13 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
           <p className="p-3 bg-[#fdf2f2] border border-[#5a0f18]/15 rounded-xl text-xs text-[#534344] leading-relaxed">Sesi dan hak akses diverifikasi oleh Supabase. Kata sandi tidak disimpan di website ini.</p>
           {errorMsg && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs" role="alert">{errorMsg}</div>}
           <div>
-            <label htmlFor="admin-email-input" className="text-xs font-bold text-[#201112] block mb-1.5">Email Administrator</label>
-            <input id="admin-email-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@kpu.go.id" autoFocus required className="w-full px-3 py-2.5 bg-[#fbf9f9] border border-[#d5cbcd] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/30" />
+            <label htmlFor="admin-username-input" className="text-xs font-bold text-[#201112] block mb-1.5">Username Administrator</label>
+            <input id="admin-username-input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="admin" autoComplete="username" autoFocus required className="w-full px-3 py-2.5 bg-[#fbf9f9] border border-[#d5cbcd] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/30" />
           </div>
           <div>
             <label htmlFor="admin-password-input" className="text-xs font-bold text-[#201112] block mb-1.5">Kata Sandi</label>
             <div className="relative">
-              <input id="admin-password-input" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-3 pr-12 py-2.5 bg-[#fbf9f9] border border-[#d5cbcd] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/30" />
+              <input id="admin-password-input" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required className="w-full px-3 pr-12 py-2.5 bg-[#fbf9f9] border border-[#d5cbcd] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/30" />
               <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#75777d]" aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}><span className="material-symbols-outlined text-[18px]">{showPassword ? 'visibility_off' : 'visibility'}</span></button>
             </div>
           </div>

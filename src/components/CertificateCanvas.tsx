@@ -14,6 +14,7 @@ export interface CertificateCanvasHandle {
 interface CertificateCanvasProps {
   name: string;
   serial: string;
+  canDownload?: boolean;
   isAdmin?: boolean;
   onShowToast: (title: string, msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
   onOpenAdminLogin?: (action?: 'upload_template' | 'reset_template') => void;
@@ -22,6 +23,7 @@ interface CertificateCanvasProps {
 export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, CertificateCanvasProps>(({
   name,
   serial,
+  canDownload = false,
   isAdmin = false,
   onShowToast,
   onOpenAdminLogin,
@@ -305,7 +307,8 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         // Label "Nomor :" sudah tercetak, jadi hanya nomor registrasi yang ditambahkan.
         ctx.textAlign = 'left';
         ctx.fillStyle = '#1c1112';
-        ctx.fillText(cleanSerial, Math.round(663 * scaleX), Math.round(398 * scaleY));
+        // Mulai setelah titik dua dengan jarak visual setara dua spasi.
+        ctx.fillText(cleanSerial, Math.round(643 * scaleX), Math.round(398 * scaleY));
 
         ctx.restore();
       }
@@ -327,6 +330,11 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle Ultra-HD JPG Download (rendered at 2x master resolution)
   const handleDownloadJPG = () => {
+    if (!canDownload) {
+      onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan JPG dapat dibuka.', 'warning');
+      return;
+    }
+
     try {
       const img = imageRef.current;
       const naturalW = img?.naturalWidth || 1448;
@@ -355,7 +363,12 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle True 300 DPI Ultra-HD PDF Generation & Direct Download
   const handleDownloadPDF = async () => {
-    if (isExportingPDF) return;
+    if (isExportingPDF || !canDownload) {
+      if (!canDownload) {
+        onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan PDF dapat dibuka.', 'warning');
+      }
+      return;
+    }
     setIsExportingPDF(true);
 
     onShowToast(
@@ -549,26 +562,29 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
             <button
               id="btnDownloadPDF"
               type="button"
-              disabled={isExportingPDF}
+              disabled={isExportingPDF || !canDownload}
               onClick={handleDownloadPDF}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5a0f18] hover:bg-[#3d080e] text-white text-xs font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:opacity-60"
+              title={canDownload ? 'Unduh sertifikat dalam format PDF' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5a0f18] hover:bg-[#3d080e] text-white text-xs font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
             >
               <span className={`material-symbols-outlined text-[18px] text-[#ffdcc3] ${isExportingPDF ? 'animate-spin' : ''}`}>
                 {isExportingPDF ? 'sync' : 'picture_as_pdf'}
               </span>
-              <span>{isExportingPDF ? 'Memproses PDF HD...' : 'Unduh Sertifikat (PDF Ultra HD)'}</span>
+              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
             </button>
 
             <button
               id="btnDownloadJPG"
               type="button"
+              disabled={!canDownload}
               onClick={handleDownloadJPG}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] text-xs font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer"
+              title={canDownload ? 'Unduh sertifikat dalam format JPG' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] text-xs font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[18px] text-[#5a0f18]">
                 image
               </span>
-              <span>Unduh Gambar (JPG HD)</span>
+              <span>{canDownload ? 'JPG' : 'JPG Terkunci'}</span>
             </button>
           </div>
 

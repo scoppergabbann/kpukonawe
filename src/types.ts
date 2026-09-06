@@ -8,6 +8,12 @@ export interface AttendanceRecord {
   status: 'Tervalidasi' | 'Menunggu';
 }
 
+export interface PublicAttendanceRecord {
+  id: string;
+  name: string;
+  instansi: string;
+}
+
 export interface ToastState {
   show: boolean;
   title: string;

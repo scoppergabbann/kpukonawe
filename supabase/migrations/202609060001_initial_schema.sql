@@ -10,7 +10,7 @@ create table if not exists public.attendance_records (
   created_at timestamptz not null default now(),
   name text not null check (char_length(name) between 2 and 150),
   institution text not null check (char_length(institution) between 2 and 180),
-  email text not null check (email ~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'),
+  email text not null unique check (email ~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'),
   certificate_serial text not null unique,
   status text not null default 'Tervalidasi' check (status in ('Tervalidasi', 'Menunggu'))
 );
@@ -40,9 +40,13 @@ begin
   if char_length(trim(p_institution)) < 2 or char_length(trim(p_institution)) > 180 then raise exception 'Instansi tidak valid'; end if;
   if trim(lower(p_email)) !~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' then raise exception 'Alamat email tidak valid'; end if;
   next_number := nextval('public.attendance_serial_seq');
-  insert into public.attendance_records (name, institution, email, certificate_serial)
-  values (trim(p_name), trim(p_institution), trim(lower(p_email)), lpad(next_number::text, 3, '0') || '/HM.07/7402/2/2026')
-  returning * into new_record;
+  begin
+    insert into public.attendance_records (name, institution, email, certificate_serial)
+    values (trim(p_name), trim(p_institution), trim(lower(p_email)), lpad(next_number::text, 3, '0') || '/HM.07/7402/2/2026')
+    returning * into new_record;
+  exception when unique_violation then
+    raise exception 'Email ini sudah melakukan presensi dan tidak dapat didaftarkan kembali';
+  end;
   return next new_record;
 end;
 $$;

@@ -10,6 +10,7 @@ interface AttendanceFormProps {
   serial: string;
   setSerial: (val: string) => void;
   date: string;
+  isSubmitting: boolean;
   onSubmit: () => void;
   onReset: () => void;
 }
@@ -24,6 +25,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
   serial,
   setSerial,
   date,
+  isSubmitting,
   onSubmit,
   onReset,
 }) => {
@@ -200,18 +202,22 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
           <button
             id="btnSubmitPresensi"
             type="submit"
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#5a0f18] hover:bg-[#3d080e] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:shadow-md cursor-pointer"
+            disabled={isSubmitting}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#5a0f18] hover:bg-[#3d080e] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:cursor-wait disabled:opacity-65"
           >
-            <span className="material-symbols-outlined text-[18px]">verified_user</span>
-            <span>Kirim Presensi &amp; Unduh Sertifikat</span>
+            <span className={`material-symbols-outlined text-[18px] ${isSubmitting ? 'animate-spin' : ''}`}>
+              {isSubmitting ? 'sync' : 'verified_user'}
+            </span>
+            <span>{isSubmitting ? 'Menyimpan Presensi...' : 'Kirim Presensi & Unduh Sertifikat'}</span>
           </button>
 
           <button
             id="btnResetForm"
             type="button"
             onClick={onReset}
+            disabled={isSubmitting}
             title="Reset Form"
-            className="py-2.5 px-3 bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] rounded-xl text-xs font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer"
+            className="py-2.5 px-3 bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] rounded-xl text-xs font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[18px]">refresh</span>
           </button>

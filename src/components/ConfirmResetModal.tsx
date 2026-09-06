@@ -40,7 +40,7 @@ export const ConfirmResetModal: React.FC<ConfirmResetModalProps> = ({
               </h3>
               <p className="text-xs text-[#534344] mt-1 leading-relaxed">
                 Anda akan menghapus seluruh data kehadiran sebanyak{' '}
-                <span className="font-bold text-[#ba1a1a]">{recordCount} peserta</span> dari penyimpanan lokal.
+                <span className="font-bold text-[#ba1a1a]">{recordCount} peserta</span> dari Supabase.
               </p>
             </div>
           </div>

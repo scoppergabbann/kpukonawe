@@ -1,4 +1,4 @@
-import type { AttendanceRecord } from '../types';
+import type { AttendanceRecord, PublicAttendanceRecord } from '../types';
 import { isSupabaseConfigured, supabase } from './supabase';
 
 type AttendanceRow = {
@@ -58,14 +58,55 @@ export async function listAttendance() {
   return ((data || []) as AttendanceRow[]).map(mapAttendance);
 }
 
+export async function listPublicAttendance(): Promise<PublicAttendanceRecord[]> {
+  requireConfiguration();
+  const { data, error } = await supabase.rpc('list_public_attendance');
+  if (error) throw error;
+  return ((data || []) as Array<{ id: string; name: string; institution: string }>).map((row) => ({
+    id: row.id,
+    name: row.name,
+    instansi: row.institution,
+  }));
+}
+
 export async function clearAttendance() {
   requireConfiguration();
   const { error } = await supabase.from('attendance_records').delete().not('id', 'is', null);
   if (error) throw error;
 }
 
-export async function signInAdmin(email: string, password: string) {
+export async function updateAttendanceRecord(
+  id: string,
+  input: { name: string; institution: string; email: string; status: AttendanceRecord['status'] }
+) {
   requireConfiguration();
+  const { data, error } = await supabase
+    .from('attendance_records')
+    .update({
+      name: input.name.trim(),
+      institution: input.institution.trim(),
+      email: input.email.trim().toLowerCase(),
+      status: input.status,
+    })
+    .eq('id', id)
+    .select('id, created_at, name, institution, email, certificate_serial, status')
+    .single();
+  if (error) throw error;
+  return mapAttendance(data as AttendanceRow);
+}
+
+export async function deleteAttendanceRecord(id: string) {
+  requireConfiguration();
+  const { error } = await supabase.from('attendance_records').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function signInAdmin(username: string, password: string) {
+  requireConfiguration();
+  const normalizedUsername = username.trim().toLowerCase();
+  const email = normalizedUsername.includes('@')
+    ? normalizedUsername
+    : `${normalizedUsername}@kpukonawe.local`;
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
   const { data: admin, error: adminError } = await supabase

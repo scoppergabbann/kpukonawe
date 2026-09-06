@@ -10,22 +10,21 @@ import { ActivityGuide } from './components/ActivityGuide';
 import { Toast } from './components/Toast';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { ConfirmResetModal } from './components/ConfirmResetModal';
-import { AttendanceRecord, ActiveNavTab, ToastState } from './types';
+import { ParticipantEditorModal } from './components/ParticipantEditorModal';
+import { AttendanceRecord, ActiveNavTab, PublicAttendanceRecord, ToastState } from './types';
 import {
   clearAttendance,
+  deleteAttendanceRecord,
   getAttendanceCount,
   isCurrentUserAdmin,
   listAttendance,
+  listPublicAttendance,
   signInAdmin,
   signOutAdmin,
   submitAttendance,
+  updateAttendanceRecord,
 } from './lib/supabase-api';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
-
-export const formatCertSerial = (seq: number): string => {
-  const padded = String(seq).padStart(3, '0');
-  return `${padded}/HM.07/7402/2/2026`;
-};
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveNavTab>(
@@ -34,19 +33,25 @@ export default function App() {
   const [bottomTab, setBottomTab] = useState<'records' | 'guide'>('records');
 
   // Form states
-  const [name, setName] = useState('Dr. Budi Santoso, M.Kom.');
-  const [email, setEmail] = useState('budi.santoso@univ-tech.ac.id');
-  const [instansi, setInstansi] = useState('Universitas Indonesia');
-  const [serial, setSerial] = useState(() => formatCertSerial(1));
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [instansi, setInstansi] = useState('');
+  const [serial, setSerial] = useState('');
+  const [issuedRecord, setIssuedRecord] = useState<AttendanceRecord | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInFlightRef = useRef(false);
   const date = '8 September 2026';
 
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [publicRecords, setPublicRecords] = useState<PublicAttendanceRecord[]>([]);
   const [participantCount, setParticipantCount] = useState(0);
 
   // Admin Auth State
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
   const [showConfirmResetModal, setShowConfirmResetModal] = useState(false);
+  const [managedParticipant, setManagedParticipant] = useState<AttendanceRecord | null>(null);
+  const [isManagingParticipant, setIsManagingParticipant] = useState(false);
   const [pendingAdminAction, setPendingAdminAction] = useState<
     'export_csv' | 'reset' | 'upload_template' | 'reset_template' | null
   >(null);
@@ -84,9 +89,14 @@ export default function App() {
       try {
         const [count, admin] = await Promise.all([getAttendanceCount(), isCurrentUserAdmin()]);
         setParticipantCount(count);
-        setSerial(formatCertSerial(count + 1));
         setIsAdmin(admin);
-        setRecords(admin ? await listAttendance() : []);
+        if (admin) {
+          setRecords(await listAttendance());
+          setPublicRecords([]);
+        } else {
+          setRecords([]);
+          setPublicRecords(await listPublicAttendance());
+        }
       } catch (error) {
         showToast('Koneksi Supabase Bermasalah', error instanceof Error ? error.message : 'Tidak dapat memuat data.', 'error');
       }
@@ -99,24 +109,45 @@ export default function App() {
 
   // Form submit: Kirim Presensi
   const handleSubmitPresensi = async () => {
+    if (submitInFlightRef.current) return;
+    submitInFlightRef.current = true;
+    setIsSubmitting(true);
+
     try {
       const newRecord = await submitAttendance({ name: name.trim(), institution: instansi.trim(), email: email.trim() });
       setSerial(newRecord.serial);
+      setIssuedRecord(newRecord);
       setParticipantCount((count) => count + 1);
+      setPublicRecords((current) => [
+        { id: newRecord.id, name: newRecord.name, instansi: newRecord.instansi },
+        ...current,
+      ]);
       if (isAdmin) setRecords((current) => [newRecord, ...current]);
       showToast('Presensi KPU Terverifikasi', `${newRecord.name} berhasil terdaftar dengan nomor ${newRecord.serial}.`);
     } catch (error) {
       showToast('Presensi Gagal Disimpan', error instanceof Error ? error.message : 'Supabase menolak data presensi.', 'error');
+    } finally {
+      submitInFlightRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
   // Reset form
   const handleResetForm = () => {
-    setName('Dr. Budi Santoso, M.Kom.');
-    setEmail('budi.santoso@univ-tech.ac.id');
-    setInstansi('Universitas Indonesia');
-    setSerial(formatCertSerial(participantCount + 1));
-    showToast('Form Direset', 'Data input telah dikembalikan ke nomor urut berikutnya.');
+    setName('');
+    setEmail('');
+    setInstansi('');
+    setSerial('');
+    setIssuedRecord(null);
+    showToast('Form Direset', 'Formulir dikosongkan dan unduhan sertifikat dikunci kembali.', 'info');
+  };
+
+  const updateDraft = (
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    value: string
+  ) => {
+    setter(value);
+    setIssuedRecord(null);
   };
 
   // Select a record from table to load onto canvas & form
@@ -125,11 +156,49 @@ export default function App() {
     setEmail(record.email);
     setInstansi(record.instansi);
     setSerial(record.serial);
+    setIssuedRecord(record);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     showToast(
       'Memuat Data Peserta',
       `Sertifikat atas nama ${record.name} kini ditampilkan di Live Preview.`
     );
+  };
+
+  const handleUpdateParticipant = async (
+    id: string,
+    input: { name: string; institution: string; email: string; status: AttendanceRecord['status'] }
+  ) => {
+    setIsManagingParticipant(true);
+    try {
+      const updated = await updateAttendanceRecord(id, input);
+      setRecords((current) => current.map((record) => record.id === id ? updated : record));
+      setIssuedRecord((current) => current?.id === id ? updated : current);
+      setManagedParticipant(null);
+      showToast('Data Peserta Diperbarui', `Perubahan untuk ${updated.name} telah disimpan di Supabase.`);
+    } catch (error) {
+      showToast('Gagal Memperbarui Peserta', error instanceof Error ? error.message : 'Supabase menolak perubahan data.', 'error');
+    } finally {
+      setIsManagingParticipant(false);
+    }
+  };
+
+  const handleDeleteParticipant = async (record: AttendanceRecord) => {
+    setIsManagingParticipant(true);
+    try {
+      await deleteAttendanceRecord(record.id);
+      setRecords((current) => current.filter((item) => item.id !== record.id));
+      setParticipantCount((count) => Math.max(0, count - 1));
+      if (issuedRecord?.id === record.id) {
+        setIssuedRecord(null);
+        setSerial('');
+      }
+      setManagedParticipant(null);
+      showToast('Peserta Dihapus', `Data ${record.name} telah dihapus dari Supabase.`, 'info');
+    } catch (error) {
+      showToast('Gagal Menghapus Peserta', error instanceof Error ? error.message : 'Supabase menolak penghapusan data.', 'error');
+    } finally {
+      setIsManagingParticipant(false);
+    }
   };
 
   // Execute Export CSV
@@ -191,8 +260,8 @@ export default function App() {
   };
 
   // Admin Login Handlers
-  const handleAdminLoginSuccess = async (adminEmail: string, password: string) => {
-    await signInAdmin(adminEmail, password);
+  const handleAdminLoginSuccess = async (adminUsername: string, password: string) => {
+    await signInAdmin(adminUsername, password);
     const adminRecords = await listAttendance();
     setRecords(adminRecords);
     setIsAdmin(true);
@@ -249,7 +318,7 @@ export default function App() {
     setPendingAdminAction(null);
     showToast(
       'Sesi Admin Berakhir',
-      'Anda telah keluar dari sesi Administrator KPU. Fitur ekspor CSV, reset data, dan konfigurasi server terkunci kembali.',
+      'Anda telah keluar dari sesi Administrator KPU. Ekspor dan manajemen data peserta terkunci kembali.',
       'info'
     );
   };
@@ -282,7 +351,8 @@ export default function App() {
       await clearAttendance();
       setRecords([]);
       setParticipantCount(0);
-      setSerial(formatCertSerial(1));
+      setSerial('');
+      setIssuedRecord(null);
       setShowConfirmResetModal(false);
       showToast('Data Presensi Dikosongkan', 'Seluruh riwayat presensi di Supabase telah dihapus oleh Administrator KPU.', 'info');
     } catch (error) {
@@ -347,7 +417,7 @@ export default function App() {
           {!isSupabaseConfigured && (
             <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950" role="alert">
               <p className="font-bold">Supabase belum terhubung</p>
-              <p className="mt-1 text-xs">Tambahkan Project URL dan publishable key ke file <code>.env.local</code> untuk mengaktifkan presensi, login admin, Storage, dan pengiriman email.</p>
+              <p className="mt-1 text-xs">Tambahkan Project URL dan publishable key ke file <code>.env.local</code> untuk mengaktifkan presensi, login admin, dan Storage.</p>
             </div>
           )}
           {/* Hero Banner */}
@@ -359,14 +429,15 @@ export default function App() {
             <div className="xl:col-span-5 flex flex-col gap-6">
               <AttendanceForm
                 name={name}
-                setName={setName}
+                setName={(value) => updateDraft(setName, value)}
                 email={email}
-                setEmail={setEmail}
+                setEmail={(value) => updateDraft(setEmail, value)}
                 instansi={instansi}
-                setInstansi={setInstansi}
+                setInstansi={(value) => updateDraft(setInstansi, value)}
                 serial={serial}
                 setSerial={setSerial}
                 date={date}
+                isSubmitting={isSubmitting}
                 onSubmit={handleSubmitPresensi}
                 onReset={handleResetForm}
               />
@@ -378,8 +449,9 @@ export default function App() {
             <div className="xl:col-span-7 flex flex-col gap-6 sticky top-24">
               <CertificateCanvas
                 ref={certCanvasRef}
-                name={name}
-                serial={serial}
+                name={issuedRecord?.name ?? name}
+                serial={issuedRecord?.serial ?? serial}
+                canDownload={Boolean(issuedRecord)}
                 isAdmin={isAdmin}
                 onShowToast={showToast}
                 onOpenAdminLogin={handleOpenAdminLoginForAction}
@@ -421,9 +493,11 @@ export default function App() {
             {/* Tab Panes */}
             {bottomTab === 'records' ? (
               <RosterTable
-                records={isAdmin ? records : []}
+                records={records}
+                publicRecords={publicRecords}
                 isAdmin={isAdmin}
                 onSelectRecord={handleSelectRecord}
+                onManageRecord={setManagedParticipant}
                 onExportCSV={handleRequestExportCSV}
                 onClearRecords={handleRequestClearRecords}
                 onOpenAdminLogin={() => {
@@ -452,6 +526,14 @@ export default function App() {
         recordCount={records.length}
         onClose={() => setShowConfirmResetModal(false)}
         onConfirm={handleConfirmClearRecords}
+      />
+
+      <ParticipantEditorModal
+        record={managedParticipant}
+        isSaving={isManagingParticipant}
+        onClose={() => setManagedParticipant(null)}
+        onSave={handleUpdateParticipant}
+        onDelete={handleDeleteParticipant}
       />
 
       {/* Floating Toast Notification */}
