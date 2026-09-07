@@ -83,15 +83,14 @@ export async function updateEventRegistrationStatus(input: EventRegistrationStat
   if (error) throw error;
 }
 
-export async function recoverCertificate(email: string, serial: string) {
+export async function recoverCertificate(email: string) {
   requireConfiguration();
   const { data, error } = await supabase.rpc('recover_certificate', {
     p_email: email.trim().toLowerCase(),
-    p_serial: serial.trim().toUpperCase(),
   });
   if (error) throw error;
   const row = (Array.isArray(data) ? data[0] : data) as AttendanceRow | null;
-  if (!row) throw new Error('Data sertifikat tidak ditemukan. Periksa kembali email dan nomor registrasi.');
+  if (!row) throw new Error('Data sertifikat tidak ditemukan. Periksa kembali alamat email.');
   return mapAttendance(row);
 }
 
@@ -143,10 +142,11 @@ export async function listPublicAttendance(): Promise<PublicAttendanceRecord[]> 
   requireConfiguration();
   const { data, error } = await supabase.rpc('list_public_attendance');
   if (error) throw error;
-  return ((data || []) as Array<{ id: string; name: string; institution: string }>).map((row) => ({
+  return ((data || []) as Array<{ id: string; name: string; institution: string; certificate_serial: string }>).map((row) => ({
     id: row.id,
     name: row.name,
     instansi: row.institution,
+    serial: row.certificate_serial,
   }));
 }
 

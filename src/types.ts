@@ -12,6 +12,7 @@ export interface PublicAttendanceRecord {
   id: string;
   name: string;
   instansi: string;
+  serial: string;
 }
 
 export interface EventRegistrationStatus {

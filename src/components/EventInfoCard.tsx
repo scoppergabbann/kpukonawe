@@ -42,8 +42,8 @@ export const EventInfoCard: React.FC = () => {
               Buku Referensi Pemilu
             </strong>
             <span className="text-[11px] text-[#534344] leading-relaxed">
-              &ldquo;Desain, Regulasi dan Tata Kelola Penyelenggaraan Penataan Daerah
-              Pemilihan (DAPIL)&rdquo;
+              Sistem Pemilu Indonesia &quot;Desain, Regulasi dan Tata Kelola
+              Penyelenggaraan&quot; - Penataan Daerah Pemilihan (Dapil)
             </span>
           </div>
         </div>

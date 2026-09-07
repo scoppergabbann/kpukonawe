@@ -3,6 +3,18 @@ import { AttendanceRecord, PublicAttendanceRecord } from '../types';
 
 const PUBLIC_PAGE_SIZE = 10;
 
+const serialSequence = (serial: string) => {
+  const value = Number.parseInt(serial.split('/')[0] || '', 10);
+  return Number.isNaN(value) ? Number.MAX_SAFE_INTEGER : value;
+};
+
+const orderBySerial = <T extends { serial: string; name: string }>(items: T[]) =>
+  [...items].sort(
+    (left, right) =>
+      serialSequence(left.serial) - serialSequence(right.serial) ||
+      left.name.localeCompare(right.name, 'id')
+  );
+
 interface RosterTableProps {
   records: AttendanceRecord[];
   publicRecords: PublicAttendanceRecord[];
@@ -33,20 +45,22 @@ export const RosterTable: React.FC<RosterTableProps> = ({
 
   const filteredRecords = useMemo(() => {
     const keyword = query.trim().toLowerCase();
-    return records.filter((record) => {
+    return orderBySerial(records.filter((record) => {
       const matchesQuery = !keyword || [record.name, record.instansi, record.email, record.serial]
         .some((value) => value.toLowerCase().includes(keyword));
       const matchesStatus = statusFilter === 'Semua' || record.status === statusFilter;
       return matchesQuery && matchesStatus;
-    });
+    }));
   }, [query, records, statusFilter]);
 
   const filteredPublicRecords = useMemo(() => {
     const keyword = publicQuery.trim().toLowerCase();
-    if (!keyword) return publicRecords;
-    return publicRecords.filter((record) =>
-      [record.name, record.instansi].some((value) => value.toLowerCase().includes(keyword))
-    );
+    const matches = !keyword
+      ? publicRecords
+      : publicRecords.filter((record) =>
+          [record.name, record.instansi, record.serial].some((value) => value.toLowerCase().includes(keyword))
+        );
+    return orderBySerial(matches);
   }, [publicQuery, publicRecords]);
 
   const publicPageCount = Math.max(1, Math.ceil(filteredPublicRecords.length / PUBLIC_PAGE_SIZE));
@@ -68,7 +82,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-sm sm:text-base font-bold text-[#5a0f18]">
-              Log Presensi Peserta &amp; Status Sertifikat
+              Log Peserta &amp; Nomor Sertifikat
             </h3>
             {isAdmin && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
@@ -78,7 +92,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
             )}
           </div>
           <p className="text-xs text-[#534344]">
-            Daftar kehadiran peserta webinar bedah buku sistem pemilu penataan daerah pemilihan.
+            Daftar peserta diurutkan berdasarkan nomor sertifikat, mulai dari 001.
           </p>
         </div>
 
@@ -177,7 +191,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                 setPublicQuery(event.target.value);
                 setPublicPage(1);
               }}
-              placeholder="Cari nama peserta atau instansi..."
+              placeholder="Cari nama, nomor sertifikat, atau institusi..."
               className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
             />
           </label>
@@ -265,13 +279,14 @@ export const RosterTable: React.FC<RosterTableProps> = ({
             <thead>
               <tr className="bg-[#f6f1f1] text-[#75777d] font-mono text-[11px] uppercase tracking-wider">
                 <th className="py-3 px-4 rounded-l-lg">Nama Peserta</th>
-                <th className="py-3 px-4 rounded-r-lg">Instansi</th>
+                <th className="py-3 px-4">Nomor Sertifikat</th>
+                <th className="py-3 px-4 rounded-r-lg">Asal Kampus / Universitas</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0e6e7]">
               {paginatedPublicRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={2} className="py-8 text-center text-[#75777d]">
+                  <td colSpan={3} className="py-8 text-center text-[#75777d]">
                     {publicRecords.length === 0
                       ? 'Belum ada peserta yang tercatat.'
                       : 'Nama peserta atau instansi tidak ditemukan.'}
@@ -281,6 +296,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                 paginatedPublicRecords.map((record) => (
                   <tr key={record.id} className="hover:bg-[#f6f1f1]/60 transition-colors">
                     <td className="py-3.5 px-4 font-bold text-[#5a0f18] text-xs">{record.name}</td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#5a0f18]">{record.serial}</td>
                     <td className="py-3.5 px-4 text-[#201112]">{record.instansi}</td>
                   </tr>
                 ))

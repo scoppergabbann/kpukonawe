@@ -213,7 +213,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
             <span className={`material-symbols-outlined text-[18px] ${isSubmitting ? 'animate-spin' : ''}`}>
               {isSubmitting ? 'sync' : 'verified_user'}
             </span>
-            <span>{!registrationOpen ? 'Masa Presensi Ditutup' : isSubmitting ? 'Menyimpan Presensi...' : 'Kirim Presensi & Unduh Sertifikat'}</span>
+            <span>{!registrationOpen ? 'Masa Presensi Ditutup' : isSubmitting ? 'Menyimpan Presensi...' : 'Periksa & Kirim Presensi'}</span>
           </button>
 
           <button

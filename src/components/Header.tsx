@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5a0f18]"></span>
             </span>
             <span className="text-xs font-medium text-[#201112] truncate max-w-sm">
-              Bedah Buku Sistem Pemilu Indonesia (DAPIL) - Daring
+              Sistem Pemilu Indonesia &quot;Desain, Regulasi dan Tata Kelola Penyelenggaraan&quot; - Penataan Daerah Pemilihan (Dapil)
             </span>
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#5a0f18]/10 text-[#5a0f18]">
               KPU

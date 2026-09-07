@@ -489,7 +489,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="w-2.5 h-2.5 rounded-full bg-[#5a0f18]" />
             <h3 className="text-sm sm:text-base font-bold text-[#5a0f18]">
-              Live Preview E-Sertifikat KPU
+              E-Sertifikat Berhasil Diterbitkan
             </h3>
             {isCustomTemplate ? (
               <span
@@ -575,19 +575,18 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
           </div>
         </div>
 
-        {/* The Viewport Stage */}
-        <div
-          id="certificate-canvas-stage"
-          className="relative w-full rounded-xl bg-[#f6f1f1] overflow-hidden shadow-inner flex items-center justify-center p-2 border border-[#d5cbcd]/40"
-        >
-          <canvas
-            ref={canvasRef}
-            id="certCanvas"
-            width={1448}
-            height={1086}
-            className="w-full h-auto max-w-full rounded shadow-xl transition-all duration-150"
-          />
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex items-start gap-3">
+            <span className="material-symbols-outlined text-emerald-700">task_alt</span>
+            <div>
+              <p className="text-sm font-bold text-emerald-950">Sertifikat siap diunduh</p>
+              <p className="mt-1 text-xs text-emerald-900">{name} • {serial}</p>
+            </div>
+          </div>
         </div>
+
+        {/* Canvas dirender tersembunyi hanya untuk menghasilkan PDF/JPG. */}
+        <canvas ref={canvasRef} id="certCanvas" width={1448} height={1086} className="hidden" />
 
         {/* Action Buttons Toolbar */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">

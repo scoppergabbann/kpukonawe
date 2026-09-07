@@ -41,8 +41,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
             id="event-main-title"
             className="text-2xl sm:text-3xl lg:text-[32px] font-bold text-[#5a0f18] tracking-tight leading-tight"
           >
-            Bedah Buku Sistem Pemilu Indonesia: “Desain, Regulasi dan Tata Kelola
-            Penyelenggaraan” Penataan Daerah Pemilihan (DAPIL)
+            Sistem Pemilu Indonesia &quot;Desain, Regulasi dan Tata Kelola
+            Penyelenggaraan&quot; - Penataan Daerah Pemilihan (Dapil)
           </h1>
 
           {/* Subtitle Details */}

@@ -14,6 +14,7 @@ import { ParticipantEditorModal } from './components/ParticipantEditorModal';
 import { CertificateRecovery } from './components/CertificateRecovery';
 import { CertificateVerification } from './components/CertificateVerification';
 import { AdminToolsPanel } from './components/AdminToolsPanel';
+import { AttendanceConfirmationModal } from './components/AttendanceConfirmationModal';
 import {
   AttendanceRecord,
   ActiveNavTab,
@@ -57,6 +58,7 @@ export default function App() {
   const [serial, setSerial] = useState('');
   const [issuedRecord, setIssuedRecord] = useState<AttendanceRecord | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAttendanceConfirmation, setShowAttendanceConfirmation] = useState(false);
   const submitInFlightRef = useRef(false);
   const date = '8 September 2026';
 
@@ -174,7 +176,11 @@ export default function App() {
       .finally(() => setIsVerifyingCertificate(false));
   }, []);
 
-  // Form submit: Kirim Presensi
+  const handleRequestSubmitPresensi = () => {
+    setShowAttendanceConfirmation(true);
+  };
+
+  // Form submit: Kirim Presensi setelah data dikonfirmasi.
   const handleSubmitPresensi = async () => {
     if (submitInFlightRef.current) return;
     submitInFlightRef.current = true;
@@ -184,9 +190,10 @@ export default function App() {
       const newRecord = await submitAttendance({ name: name.trim(), institution: instansi.trim(), email: email.trim() });
       setSerial(newRecord.serial);
       setIssuedRecord(newRecord);
+      setShowAttendanceConfirmation(false);
       setParticipantCount((count) => count + 1);
       setPublicRecords((current) => [
-        { id: newRecord.id, name: newRecord.name, instansi: newRecord.instansi },
+        { id: newRecord.id, name: newRecord.name, instansi: newRecord.instansi, serial: newRecord.serial },
         ...current,
       ]);
       if (isAdmin) setRecords((current) => [newRecord, ...current]);
@@ -209,8 +216,8 @@ export default function App() {
     showToast('Form Direset', 'Formulir dikosongkan dan unduhan sertifikat dikunci kembali.', 'info');
   };
 
-  const handleRecoverCertificate = async (recoveryEmail: string, recoverySerial: string) => {
-    const recovered = await recoverCertificate(recoveryEmail, recoverySerial);
+  const handleRecoverCertificate = async (recoveryEmail: string) => {
+    const recovered = await recoverCertificate(recoveryEmail);
     setName(recovered.name);
     setEmail(recovered.email);
     setInstansi(recovered.instansi);
@@ -261,7 +268,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     showToast(
       'Memuat Data Peserta',
-      `Sertifikat atas nama ${record.name} kini ditampilkan di Live Preview.`
+      `Sertifikat atas nama ${record.name} siap diunduh.`
     );
   };
 
@@ -561,9 +568,9 @@ export default function App() {
           <HeroBanner attendeeCount={participantCount} />
 
           {/* 2-Column Split Workspace */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          <div className={`grid grid-cols-1 gap-6 items-start ${issuedRecord ? 'xl:grid-cols-12' : 'mx-auto max-w-3xl'}`}>
             {/* Left Column (5 cols): Registration Form + Info Card */}
-            <div className="xl:col-span-5 flex flex-col gap-6">
+            <div className={`${issuedRecord ? 'xl:col-span-5' : ''} flex flex-col gap-6`}>
               <AttendanceForm
                 name={name}
                 setName={(value) => updateDraft(setName, value)}
@@ -576,26 +583,28 @@ export default function App() {
                 date={date}
                 isSubmitting={isSubmitting}
                 registrationOpen={eventStatus.accepting}
-                onSubmit={handleSubmitPresensi}
+                onSubmit={handleRequestSubmitPresensi}
                 onReset={handleResetForm}
               />
 
               <EventInfoCard />
             </div>
 
-            {/* Right Column (7 cols): Live Certificate Canvas + Quick Metrics */}
-            <div className="xl:col-span-7 flex flex-col gap-6 sticky top-24">
-              <CertificateCanvas
-                ref={certCanvasRef}
-                name={issuedRecord?.name ?? name}
-                serial={issuedRecord?.serial ?? serial}
-                verificationId={issuedRecord?.id}
-                canDownload={Boolean(issuedRecord)}
-                isAdmin={isAdmin}
-                onShowToast={showToast}
-                onOpenAdminLogin={handleOpenAdminLoginForAction}
-              />
-            </div>
+            {/* Opsi unduh hanya muncul setelah presensi atau pemulihan berhasil. */}
+            {issuedRecord && (
+              <div className="xl:col-span-7 flex flex-col gap-6 sticky top-24">
+                <CertificateCanvas
+                  ref={certCanvasRef}
+                  name={issuedRecord.name}
+                  serial={issuedRecord.serial}
+                  verificationId={issuedRecord.id}
+                  canDownload
+                  isAdmin={isAdmin}
+                  onShowToast={showToast}
+                  onOpenAdminLogin={handleOpenAdminLoginForAction}
+                />
+              </div>
+            )}
           </div>
 
           {isAdmin && (
@@ -663,6 +672,16 @@ export default function App() {
           )}
         </main>
       </div>
+
+      <AttendanceConfirmationModal
+        isOpen={showAttendanceConfirmation}
+        name={name.trim()}
+        instansi={instansi.trim()}
+        email={email.trim()}
+        isSubmitting={isSubmitting}
+        onClose={() => setShowAttendanceConfirmation(false)}
+        onConfirm={handleSubmitPresensi}
+      />
 
       {/* Admin Login Modal */}
       <AdminLoginModal

@@ -54,7 +54,7 @@ export const ActivityGuide: React.FC = () => {
           <p className="text-xs text-[#534344] leading-relaxed">
             Sertifikat ini disahkan secara institusional oleh Ketua KPU Kabupaten Konawe
             (Wike) atas partisipasi aktif dalam agenda bedah buku penataan daerah pemilihan
-            (DAPIL).
+            (Dapil).
           </p>
           <div className="p-2 mt-auto rounded bg-white text-[11px] font-mono text-[#75777d] border border-[#f0e6e7]">
             Otoritas: Komisi Pemilihan Umum Kab. Konawe
@@ -75,7 +75,7 @@ export const ActivityGuide: React.FC = () => {
           <h4 className="text-sm font-bold text-[#5a0f18]">Format PDF &amp; Gambar HD</h4>
           <p className="text-xs text-[#534344] leading-relaxed">
             Peserta dapat langsung mencetak dalam format PDF atau mengunduh gambar
-            beresolusi tinggi (PNG HD) untuk portofolio maupun pelaporan kedinasan/akademik.
+            beresolusi tinggi (JPG HD) untuk portofolio maupun pelaporan kedinasan/akademik.
           </p>
           <div className="p-2 mt-auto rounded bg-white text-[11px] font-mono text-[#75777d] border border-[#f0e6e7]">
             Validitas: Surat Keputusan / Agenda Resmi KPU
