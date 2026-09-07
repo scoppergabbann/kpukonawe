@@ -19,4 +19,4 @@ npm run dev
 
 ## Keamanan
 
-Pengunjung dapat melihat nama peserta, nomor sertifikat, dan asal kampus/universitas. Sertifikat dapat dicari ulang menggunakan email yang dipakai saat presensi. Daftar email, pengelolaan peserta, ekspor CSV, dan penghapusan data tetap hanya dapat diakses administrator.
+Pengunjung dapat melihat nama peserta, nomor sertifikat, dan instansi/organisasi asal. Sertifikat dapat dicari ulang menggunakan email yang dipakai saat presensi. Daftar email dan No. HP, pengelolaan peserta, ekspor CSV, serta penghapusan data hanya dapat diakses administrator.

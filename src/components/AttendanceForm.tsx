@@ -5,6 +5,8 @@ interface AttendanceFormProps {
   setName: (val: string) => void;
   email: string;
   setEmail: (val: string) => void;
+  phone: string;
+  setPhone: (val: string) => void;
   instansi: string;
   setInstansi: (val: string) => void;
   serial: string;
@@ -21,6 +23,8 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
   setName,
   email,
   setEmail,
+  phone,
+  setPhone,
   instansi,
   setInstansi,
   serial,
@@ -99,38 +103,66 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
           </div>
         </div>
 
-        <div>
-          <label
-            htmlFor="inputEmail"
-            className="block text-xs font-semibold text-[#201112] mb-1"
-          >
-            Alamat Email Aktif <span className="text-[#ba1a1a]">*</span>
-          </label>
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#75777d] text-[18px]">
-              mail
-            </span>
-            <input
-              id="inputEmail"
-              type="email"
-              required
-              disabled={!registrationOpen}
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (emailError) setEmailError(null);
-              }}
-              placeholder="nama@institusi.ac.id"
-              className={`w-full pl-10 pr-3 py-2 text-sm rounded-xl bg-[#fbf9f9] text-[#201112] focus:bg-white focus:ring-2 focus:ring-[#5a0f18]/25 border ${
-                emailError ? 'border-[#ba1a1a]' : 'border-[#d5cbcd]'
-              } focus:border-[#5a0f18] focus:outline-none transition-all shadow-2xs`}
-            />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="inputEmail"
+              className="block text-xs font-semibold text-[#201112] mb-1"
+            >
+              Alamat Email Aktif <span className="text-[#ba1a1a]">*</span>
+            </label>
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#75777d] text-[18px]">
+                mail
+              </span>
+              <input
+                id="inputEmail"
+                type="email"
+                required
+                disabled={!registrationOpen}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError(null);
+                }}
+                placeholder="nama@institusi.ac.id"
+                className={`w-full pl-10 pr-3 py-2 text-sm rounded-xl bg-[#fbf9f9] text-[#201112] focus:bg-white focus:ring-2 focus:ring-[#5a0f18]/25 border ${
+                  emailError ? 'border-[#ba1a1a]' : 'border-[#d5cbcd]'
+                } focus:border-[#5a0f18] focus:outline-none transition-all shadow-2xs`}
+              />
+            </div>
+            {emailError && (
+              <p id="emailError" className="text-xs text-[#ba1a1a] mt-1 font-medium">
+                {emailError}
+              </p>
+            )}
           </div>
-          {emailError && (
-            <p id="emailError" className="text-xs text-[#ba1a1a] mt-1 font-medium">
-              {emailError}
-            </p>
-          )}
+
+          <div>
+            <label htmlFor="inputPhone" className="block text-xs font-semibold text-[#201112] mb-1">
+              No. HP <span className="text-[#ba1a1a]">*</span>
+            </label>
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#75777d] text-[18px]">
+                phone
+              </span>
+              <input
+                id="inputPhone"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]{8,15}"
+                minLength={8}
+                maxLength={15}
+                required
+                disabled={!registrationOpen}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 15))}
+                placeholder="081234567890"
+                title="Masukkan 8 sampai 15 angka tanpa spasi atau tanda baca"
+                className="w-full pl-10 pr-3 py-2 text-sm rounded-xl bg-[#fbf9f9] text-[#201112] focus:bg-white focus:ring-2 focus:ring-[#5a0f18]/25 border border-[#d5cbcd] focus:border-[#5a0f18] focus:outline-none transition-all shadow-2xs"
+              />
+            </div>
+          </div>
         </div>
 
         <div>
@@ -138,7 +170,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
             htmlFor="inputInstansi"
             className="block text-xs font-semibold text-[#201112] mb-1"
           >
-            Instansi / Afiliasi / Universitas <span className="text-[#ba1a1a]">*</span>
+            Instansi/Organisasi Asal <span className="text-[#ba1a1a]">*</span>
           </label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#75777d] text-[18px]">

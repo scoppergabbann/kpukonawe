@@ -4,6 +4,7 @@ export interface AttendanceRecord {
   name: string;
   instansi: string;
   email: string;
+  phone: string;
   serial: string;
   status: 'Tervalidasi' | 'Menunggu';
 }
@@ -35,6 +36,7 @@ export interface ImportParticipantInput {
   name: string;
   institution: string;
   email: string;
+  phone: string;
 }
 
 export interface ImportParticipantResult {

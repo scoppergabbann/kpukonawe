@@ -5,6 +5,7 @@ interface AttendanceConfirmationModalProps {
   name: string;
   instansi: string;
   email: string;
+  phone: string;
   isSubmitting: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -15,6 +16,7 @@ export const AttendanceConfirmationModal: React.FC<AttendanceConfirmationModalPr
   name,
   instansi,
   email,
+  phone,
   isSubmitting,
   onClose,
   onConfirm,
@@ -23,8 +25,9 @@ export const AttendanceConfirmationModal: React.FC<AttendanceConfirmationModalPr
 
   const details = [
     { icon: 'person', label: 'Nama Lengkap + Gelar', value: name },
-    { icon: 'account_balance', label: 'Institusi / Universitas', value: instansi },
+    { icon: 'account_balance', label: 'Instansi/Organisasi Asal', value: instansi },
     { icon: 'mail', label: 'Alamat Email', value: email },
+    { icon: 'phone', label: 'No. HP', value: phone },
   ];
 
   return (

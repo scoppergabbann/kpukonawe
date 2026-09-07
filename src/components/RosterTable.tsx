@@ -46,7 +46,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
   const filteredRecords = useMemo(() => {
     const keyword = query.trim().toLowerCase();
     return orderBySerial(records.filter((record) => {
-      const matchesQuery = !keyword || [record.name, record.instansi, record.email, record.serial]
+      const matchesQuery = !keyword || [record.name, record.instansi, record.email, record.phone, record.serial]
         .some((value) => value.toLowerCase().includes(keyword));
       const matchesStatus = statusFilter === 'Semua' || record.status === statusFilter;
       return matchesQuery && matchesStatus;
@@ -160,7 +160,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Cari nama, instansi, email, atau nomor..."
+              placeholder="Cari nama, instansi, email, No. HP, atau nomor..."
               className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
             />
           </label>
@@ -206,8 +206,9 @@ export const RosterTable: React.FC<RosterTableProps> = ({
             <tr className="bg-[#f6f1f1] text-[#75777d] font-mono text-[11px] uppercase tracking-wider">
               <th className="py-3 px-4 rounded-l-lg">Waktu Masuk</th>
               <th className="py-3 px-4">Nama Peserta</th>
-              <th className="py-3 px-4">Instansi</th>
+              <th className="py-3 px-4">Instansi/Organisasi Asal</th>
               <th className="py-3 px-4">Email</th>
+              <th className="py-3 px-4">No. HP</th>
               <th className="py-3 px-4">No. Registrasi Sertifikat</th>
               <th className="py-3 px-4">Status</th>
               <th className="py-3 px-4 text-right rounded-r-lg">Aksi Cepat</th>
@@ -216,7 +217,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
           <tbody id="rosterTableBody" className="divide-y divide-[#f0e6e7]">
             {filteredRecords.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-[#75777d]">
+                <td colSpan={8} className="py-8 text-center text-[#75777d]">
                   {isAdmin
                     ? records.length === 0
                       ? 'Belum ada catatan presensi tersimpan di Supabase.'
@@ -239,6 +240,9 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                   <td className="py-3.5 px-4 text-[#201112]">{rec.instansi}</td>
                   <td className="py-3.5 px-4 text-[#534344] font-mono text-[11px]">
                     {rec.email}
+                  </td>
+                  <td className="py-3.5 px-4 text-[#534344] font-mono text-[11px] whitespace-nowrap">
+                    {rec.phone || '-'}
                   </td>
                   <td className="py-3.5 px-4 font-mono font-bold text-[#5a0f18]">
                     {rec.serial}
@@ -280,7 +284,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
               <tr className="bg-[#f6f1f1] text-[#75777d] font-mono text-[11px] uppercase tracking-wider">
                 <th className="py-3 px-4 rounded-l-lg">Nama Peserta</th>
                 <th className="py-3 px-4">Nomor Sertifikat</th>
-                <th className="py-3 px-4 rounded-r-lg">Asal Kampus / Universitas</th>
+                <th className="py-3 px-4 rounded-r-lg">Instansi/Organisasi Asal</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0e6e7]">

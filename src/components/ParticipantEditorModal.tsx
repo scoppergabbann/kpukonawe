@@ -7,7 +7,7 @@ interface ParticipantEditorModalProps {
   onClose: () => void;
   onSave: (
     id: string,
-    input: { name: string; institution: string; email: string; status: AttendanceRecord['status'] }
+    input: { name: string; institution: string; email: string; phone: string; status: AttendanceRecord['status'] }
   ) => Promise<void>;
   onDelete: (record: AttendanceRecord) => Promise<void>;
 }
@@ -22,6 +22,7 @@ export const ParticipantEditorModal: React.FC<ParticipantEditorModalProps> = ({
   const [name, setName] = useState('');
   const [institution, setInstitution] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<AttendanceRecord['status']>('Tervalidasi');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -30,6 +31,7 @@ export const ParticipantEditorModal: React.FC<ParticipantEditorModalProps> = ({
     setName(record.name);
     setInstitution(record.instansi);
     setEmail(record.email);
+    setPhone(record.phone);
     setStatus(record.status);
     setConfirmDelete(false);
   }, [record]);
@@ -38,7 +40,7 @@ export const ParticipantEditorModal: React.FC<ParticipantEditorModalProps> = ({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    await onSave(record.id, { name, institution, email, status });
+    await onSave(record.id, { name, institution, email, phone, status });
   };
 
   return (
@@ -61,13 +63,19 @@ export const ParticipantEditorModal: React.FC<ParticipantEditorModalProps> = ({
             <input required minLength={2} maxLength={150} value={name} onChange={(event) => setName(event.target.value)} className="mt-1.5 w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20" />
           </label>
           <label className="block text-sm font-semibold text-[#201112]">
-            Instansi
+            Instansi/Organisasi Asal
             <input required minLength={2} maxLength={180} value={institution} onChange={(event) => setInstitution(event.target.value)} className="mt-1.5 w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20" />
           </label>
-          <label className="block text-sm font-semibold text-[#201112]">
-            Email
-            <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-1.5 w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20" />
-          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block text-sm font-semibold text-[#201112]">
+              Email
+              <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-1.5 w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20" />
+            </label>
+            <label className="block text-sm font-semibold text-[#201112]">
+              No. HP
+              <input required type="tel" inputMode="numeric" pattern="[0-9]{8,15}" minLength={8} maxLength={15} value={phone} onChange={(event) => setPhone(event.target.value.replace(/\D/g, '').slice(0, 15))} title="Masukkan 8 sampai 15 angka" className="mt-1.5 w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20" />
+            </label>
+          </div>
           <label className="block text-sm font-semibold text-[#201112]">
             Status sertifikat
             <select value={status} onChange={(event) => setStatus(event.target.value as AttendanceRecord['status'])} className="mt-1.5 w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20">

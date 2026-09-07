@@ -14,6 +14,7 @@ type AttendanceRow = {
   name: string;
   institution: string;
   email: string;
+  phone: string | null;
   certificate_serial: string;
   status: 'Tervalidasi' | 'Menunggu';
 };
@@ -33,14 +34,15 @@ const mapAttendance = (row: AttendanceRow): AttendanceRecord => ({
   name: row.name,
   instansi: row.institution,
   email: row.email,
+  phone: row.phone ?? '',
   serial: row.certificate_serial,
   status: row.status,
 });
 
-export async function submitAttendance(input: { name: string; institution: string; email: string }) {
+export async function submitAttendance(input: { name: string; institution: string; email: string; phone: string }) {
   requireConfiguration();
   const { data, error } = await supabase.rpc('submit_attendance', {
-    p_name: input.name, p_institution: input.institution, p_email: input.email,
+    p_name: input.name, p_institution: input.institution, p_email: input.email, p_phone: input.phone,
   });
   if (error) throw error;
   const row = (Array.isArray(data) ? data[0] : data) as AttendanceRow | null;
@@ -132,7 +134,7 @@ export async function listAttendance() {
   requireConfiguration();
   const { data, error } = await supabase
     .from('attendance_records')
-    .select('id, created_at, name, institution, email, certificate_serial, status')
+    .select('id, created_at, name, institution, email, phone, certificate_serial, status')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return ((data || []) as AttendanceRow[]).map(mapAttendance);
@@ -158,7 +160,7 @@ export async function clearAttendance() {
 
 export async function updateAttendanceRecord(
   id: string,
-  input: { name: string; institution: string; email: string; status: AttendanceRecord['status'] }
+  input: { name: string; institution: string; email: string; phone: string; status: AttendanceRecord['status'] }
 ) {
   requireConfiguration();
   const { data, error } = await supabase
@@ -167,10 +169,11 @@ export async function updateAttendanceRecord(
       name: input.name.trim(),
       institution: input.institution.trim(),
       email: input.email.trim().toLowerCase(),
+      phone: input.phone.trim(),
       status: input.status,
     })
     .eq('id', id)
-    .select('id, created_at, name, institution, email, certificate_serial, status')
+    .select('id, created_at, name, institution, email, phone, certificate_serial, status')
     .single();
   if (error) throw error;
   return mapAttendance(data as AttendanceRow);

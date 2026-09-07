@@ -34,16 +34,18 @@ export const AdminToolsPanel: React.FC<AdminToolsPanelProps> = ({ eventStatus, o
     if (sheetRows.length < 2) throw new Error('Berkas tidak memiliki baris peserta.');
     const headers = sheetRows[0].map(normalizeHeader);
     const nameIndex = headers.findIndex((header) => ['nama', 'nama peserta', 'nama lengkap', 'name'].includes(header));
-    const institutionIndex = headers.findIndex((header) => ['instansi', 'institusi', 'afiliasi', 'institution'].includes(header));
+    const institutionIndex = headers.findIndex((header) => ['instansi', 'institusi', 'afiliasi', 'institution', 'instansi/organisasi asal', 'organisasi asal'].includes(header));
     const emailIndex = headers.findIndex((header) => header === 'email' || header === 'alamat email');
-    if (nameIndex < 0 || institutionIndex < 0 || emailIndex < 0) {
-      throw new Error('Kolom wajib: Nama, Instansi, dan Email.');
+    const phoneIndex = headers.findIndex((header) => ['no hp', 'nomor hp', 'phone', 'telepon', 'whatsapp', 'wa'].includes(header));
+    if (nameIndex < 0 || institutionIndex < 0 || emailIndex < 0 || phoneIndex < 0) {
+      throw new Error('Kolom wajib: Nama, Instansi/Organisasi Asal, Email, dan No. HP.');
     }
     return sheetRows.slice(1).map((row) => ({
       name: String(row[nameIndex] ?? '').trim(),
       institution: String(row[institutionIndex] ?? '').trim(),
       email: String(row[emailIndex] ?? '').trim().toLowerCase(),
-    })).filter((row) => row.name || row.institution || row.email);
+      phone: String(row[phoneIndex] ?? '').replace(/\D/g, '').slice(0, 15),
+    })).filter((row) => row.name || row.institution || row.email || row.phone);
   };
 
   const handleFile = async (file: File | undefined) => {
@@ -113,7 +115,7 @@ export const AdminToolsPanel: React.FC<AdminToolsPanelProps> = ({ eventStatus, o
       </div>
 
       <div className="rounded-2xl border border-[#5a0f18]/10 bg-white p-5 shadow-sm">
-        <div className="mb-4 flex items-center gap-3"><span className="material-symbols-outlined text-[#5a0f18]">upload_file</span><div><h3 className="text-sm font-bold text-[#5a0f18]">Impor Peserta</h3><p className="text-xs text-[#534344]">Excel/CSV dengan kolom Nama, Instansi, Email.</p></div></div>
+        <div className="mb-4 flex items-center gap-3"><span className="material-symbols-outlined text-[#5a0f18]">upload_file</span><div><h3 className="text-sm font-bold text-[#5a0f18]">Impor Peserta</h3><p className="text-xs text-[#534344]">Excel/CSV dengan kolom Nama, Instansi/Organisasi Asal, Email, dan No. HP.</p></div></div>
         <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#5a0f18]/40 bg-[#fbf9f9] px-4 py-5 text-xs font-semibold text-[#5a0f18] hover:bg-[#f6f1f1]"><span className="material-symbols-outlined">attach_file</span>{fileName || 'Pilih file .xlsx atau .csv'}<input type="file" accept=".xlsx,.csv" onChange={(event) => void handleFile(event.target.files?.[0])} className="sr-only" /></label>
         {importMessage && <p className="mt-3 text-xs text-[#534344]" role="status">{importMessage}</p>}
         <button type="button" disabled={!rows.length || isImporting} onClick={() => void importRows()} className="mt-4 rounded-xl bg-[#5a0f18] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#3d080e] disabled:cursor-not-allowed disabled:opacity-40">{isImporting ? 'Mengimpor...' : `Impor ${rows.length || ''} Peserta`}</button>

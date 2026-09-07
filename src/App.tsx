@@ -54,6 +54,7 @@ export default function App() {
   // Form states
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [instansi, setInstansi] = useState('');
   const [serial, setSerial] = useState('');
   const [issuedRecord, setIssuedRecord] = useState<AttendanceRecord | null>(null);
@@ -187,7 +188,12 @@ export default function App() {
     setIsSubmitting(true);
 
     try {
-      const newRecord = await submitAttendance({ name: name.trim(), institution: instansi.trim(), email: email.trim() });
+      const newRecord = await submitAttendance({
+        name: name.trim(),
+        institution: instansi.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+      });
       setSerial(newRecord.serial);
       setIssuedRecord(newRecord);
       setShowAttendanceConfirmation(false);
@@ -210,6 +216,7 @@ export default function App() {
   const handleResetForm = () => {
     setName('');
     setEmail('');
+    setPhone('');
     setInstansi('');
     setSerial('');
     setIssuedRecord(null);
@@ -220,6 +227,7 @@ export default function App() {
     const recovered = await recoverCertificate(recoveryEmail);
     setName(recovered.name);
     setEmail(recovered.email);
+    setPhone(recovered.phone);
     setInstansi(recovered.instansi);
     setSerial(recovered.serial);
     setIssuedRecord(recovered);
@@ -262,6 +270,7 @@ export default function App() {
   const handleSelectRecord = (record: AttendanceRecord) => {
     setName(record.name);
     setEmail(record.email);
+    setPhone(record.phone);
     setInstansi(record.instansi);
     setSerial(record.serial);
     setIssuedRecord(record);
@@ -274,7 +283,7 @@ export default function App() {
 
   const handleUpdateParticipant = async (
     id: string,
-    input: { name: string; institution: string; email: string; status: AttendanceRecord['status'] }
+    input: { name: string; institution: string; email: string; phone: string; status: AttendanceRecord['status'] }
   ) => {
     setIsManagingParticipant(true);
     try {
@@ -322,8 +331,9 @@ export default function App() {
     const headers = [
       'Waktu Masuk',
       'Nama Peserta',
-      'Instansi',
+      'Instansi/Organisasi Asal',
       'Email',
+      'No. HP',
       'No Seri Sertifikat',
       'Status',
     ];
@@ -337,6 +347,7 @@ export default function App() {
       escapeCSVCell(r.name),
       escapeCSVCell(r.instansi),
       escapeCSVCell(r.email),
+      escapeCSVCell(r.phone),
       escapeCSVCell(r.serial),
       escapeCSVCell(r.status),
     ]);
@@ -576,6 +587,8 @@ export default function App() {
                 setName={(value) => updateDraft(setName, value)}
                 email={email}
                 setEmail={(value) => updateDraft(setEmail, value)}
+                phone={phone}
+                setPhone={(value) => updateDraft(setPhone, value)}
                 instansi={instansi}
                 setInstansi={(value) => updateDraft(setInstansi, value)}
                 serial={serial}
@@ -678,6 +691,7 @@ export default function App() {
         name={name.trim()}
         instansi={instansi.trim()}
         email={email.trim()}
+        phone={phone.trim()}
         isSubmitting={isSubmitting}
         onClose={() => setShowAttendanceConfirmation(false)}
         onConfirm={handleSubmitPresensi}
