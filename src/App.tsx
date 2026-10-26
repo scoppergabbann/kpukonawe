@@ -553,9 +553,9 @@ export default function App() {
       <div className="lg:pl-64 relative z-10">
         <main className="pt-24 px-4 sm:px-6 lg:px-8 pb-16 w-full max-w-[1600px] mx-auto">
           {!isSupabaseConfigured && (
-            <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950" role="alert">
+            <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-base text-amber-950" role="alert">
               <p className="font-bold">Supabase belum terhubung</p>
-              <p className="mt-1 text-xs">Tambahkan Project URL dan publishable key ke file <code>.env.local</code> untuk mengaktifkan presensi, login admin, dan Storage.</p>
+              <p className="mt-1 text-sm">Tambahkan Project URL dan publishable key ke file <code>.env.local</code> untuk mengaktifkan presensi, login admin, dan Storage.</p>
             </div>
           )}
           {activeTab === 'unduh-ulang-sertifikat' ? (
@@ -563,13 +563,13 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => handleSelectTab('presensi-dan-unduh-sertifikat')}
-                className="mb-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#5a0f18]/15 bg-white px-4 py-2.5 text-sm font-semibold text-[#5a0f18] shadow-sm transition-colors hover:bg-[#f6f1f1]"
+                className="mb-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#5a0f18]/15 bg-white px-4 py-2.5 text-base font-semibold text-[#5a0f18] shadow-sm transition-colors hover:bg-[#f6f1f1]"
               >
                 <span className="material-symbols-outlined text-[19px]" aria-hidden="true">arrow_back</span>
                 Kembali ke Presensi
               </button>
               <CertificateRecovery onRecover={handleRecoverCertificate} />
-              <p className="mt-4 text-center text-sm leading-relaxed text-[#534344]">
+              <p className="mt-4 text-center text-base leading-relaxed text-[#534344]">
                 Setelah sertifikat ditemukan, Anda akan kembali ke halaman utama untuk mengunduh PDF atau JPG.
               </p>
             </div>
@@ -638,7 +638,7 @@ export default function App() {
                 id="tabBtnRecords"
                 type="button"
                 onClick={() => setBottomTab('records')}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                   bottomTab === 'records'
                     ? 'bg-[#5a0f18] text-white shadow-sm'
                     : 'bg-white text-[#534344] hover:text-[#201112] border border-[#f0e6e7]'
@@ -651,7 +651,7 @@ export default function App() {
                 id="tabBtnDocs"
                 type="button"
                 onClick={() => setBottomTab('guide')}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                   bottomTab === 'guide'
                     ? 'bg-[#5a0f18] text-white shadow-sm'
                     : 'bg-white text-[#534344] hover:text-[#201112] border border-[#f0e6e7]'

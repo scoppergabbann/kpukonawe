@@ -235,7 +235,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         ctx.fillStyle = '#1c1112';
         ctx.font = '500 18px Arial, sans-serif';
         // The label "Nomor :" is part of the artwork; add only its value.
-        ctx.fillText(cleanSerial, 498, 286, 290);
+        ctx.fillText(cleanSerial, 498, 288, 290);
       }
 
       const qrImage = qrImageRef.current;
@@ -407,13 +407,13 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-[#f0e6e7]">
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="w-2.5 h-2.5 rounded-full bg-[#5a0f18]" />
-            <h3 className="text-sm sm:text-base font-bold text-[#5a0f18]">
+            <h3 className="text-base sm:text-base font-bold text-[#5a0f18]">
               E-Sertifikat Berhasil Diterbitkan
             </h3>
             {isCustomTemplate ? (
               <span
                 id="custom-template-badge"
-                className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200"
+                className="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200"
               >
                 <span className="material-symbols-outlined text-[14px]">verified</span>
                 <span>Template PDF KPU HD ({customTemplateName || 'Aktif'})</span>
@@ -421,7 +421,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
             ) : (
               <span
                 id="template-resolution-badge"
-                className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-[#f6f1f1] text-[#534344] font-semibold font-mono"
+                className="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-full bg-[#f6f1f1] text-[#534344] font-semibold font-mono"
               >
                 <span className="material-symbols-outlined text-[14px] text-[#5a0f18]">verified</span>
                 <span>Diskusi Kepemiluan · 28 Oktober 2026</span>
@@ -447,7 +447,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
                   ? 'Unggah template sertifikat baru (PDF atau Gambar JPG/PNG)'
                   : 'Akses Terproteksi Admin: Unggah template sertifikat baru'
               }
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border cursor-pointer shadow-2xs ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all border cursor-pointer shadow-2xs ${
                 isAdmin
                   ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300'
                   : 'bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#5a0f18] border-[#d5cbcd]/60'
@@ -457,14 +457,14 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span>Unggah Template Baru</span>
               {!isAdmin ? (
                 <span
-                  className="material-symbols-outlined text-[13px] text-amber-700 ml-0.5"
+                  className="material-symbols-outlined text-sm text-amber-700 ml-0.5"
                   title="Memerlukan Login Administrator KPU"
                 >
                   lock
                 </span>
               ) : (
                 <span
-                  className="material-symbols-outlined text-[13px] text-emerald-700 ml-0.5"
+                  className="material-symbols-outlined text-sm text-emerald-700 ml-0.5"
                   title="Akses Administrator Terverifikasi"
                 >
                   verified
@@ -482,12 +482,12 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
                     ? 'Kembalikan ke template resmi KPU bawaan'
                     : 'Akses Terproteksi Admin: Kembalikan ke template resmi bawaan'
                 }
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-rose-50 text-rose-700 text-xs font-semibold transition-all border border-rose-200 cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-rose-50 text-rose-700 text-sm font-semibold transition-all border border-rose-200 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[15px]">history</span>
                 <span>Reset Default</span>
                 {!isAdmin && (
-                  <span className="material-symbols-outlined text-[12px] text-amber-700">lock</span>
+                  <span className="material-symbols-outlined text-sm text-amber-700">lock</span>
                 )}
               </button>
             )}
@@ -498,8 +498,8 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
           <div className="flex items-start gap-3">
             <span className="material-symbols-outlined text-emerald-700">task_alt</span>
             <div>
-              <p className="text-sm font-bold text-emerald-950">Sertifikat siap diunduh</p>
-              <p className="mt-1 text-xs text-emerald-900">{name} • {serial}</p>
+              <p className="text-base font-bold text-emerald-950">Sertifikat siap diunduh</p>
+              <p className="mt-1 text-sm text-emerald-900">{name} • {serial}</p>
             </div>
           </div>
         </div>
@@ -516,7 +516,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               disabled={isExportingPDF || !canDownload || !isQrReady || !templateLoaded}
               onClick={handleDownloadPDF}
               title={canDownload ? 'Unduh sertifikat dalam format PDF' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5a0f18] hover:bg-[#3d080e] text-white text-xs font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5a0f18] hover:bg-[#3d080e] text-white text-sm font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
             >
               <span className={`material-symbols-outlined text-[18px] text-[#ffdcc3] ${isExportingPDF ? 'animate-spin' : ''}`}>
                 {isExportingPDF ? 'sync' : 'picture_as_pdf'}
@@ -530,7 +530,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               disabled={!canDownload || !isQrReady || !templateLoaded}
               onClick={handleDownloadJPG}
               title={canDownload ? 'Unduh sertifikat dalam format JPG' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] text-xs font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] text-sm font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[18px] text-[#5a0f18]">
                 image
@@ -539,7 +539,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-[11px] font-mono text-[#75777d]">
+          <div className="flex items-center gap-2 text-sm font-mono text-[#67585b]">
             <span className="material-symbols-outlined text-[15px] text-[#5a0f18]">
               verified
             </span>

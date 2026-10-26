@@ -76,61 +76,46 @@ export const RosterTable: React.FC<RosterTableProps> = ({
   return (
     <div
       id="tabContentRecords"
-      className="bg-white rounded-2xl p-6 shadow-sm border border-[#5a0f18]/10"
+      className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-[#5a0f18]/10"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm sm:text-base font-bold text-[#5a0f18]">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-base sm:text-base font-bold text-[#5a0f18]">
               Log Peserta &amp; Nomor Sertifikat
             </h3>
             {isAdmin && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-sm font-bold font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                 Admin Aktif
               </span>
             )}
           </div>
-          <p className="text-xs text-[#534344]">
+          <p className="text-sm text-[#534344]">
             Daftar peserta diurutkan berdasarkan nomor sertifikat, mulai dari 001.
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Protected Reset Button with Admin Gatekeeper */}
-          <button
-            id="btnClearRecords"
-            type="button"
-            onClick={onClearRecords}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              isAdmin
-                ? 'text-[#ba1a1a] bg-[#ffdad6]/40 hover:bg-[#ffdad6]/80 border border-[#ba1a1a]/30 shadow-2xs'
-                : 'text-[#ba1a1a] bg-[#ffdad6]/20 hover:bg-[#ffdad6]/40 border border-[#ba1a1a]/20'
-            }`}
-            title={
-              isAdmin
-                ? 'Kosongkan riwayat presensi (Akses Admin Aktif)'
-                : 'Akses dilindungi: Masuk sebagai admin untuk mereset log kehadiran'
-            }
-          >
-            <span className="material-symbols-outlined text-[17px]">
-              {isAdmin ? 'delete_sweep' : 'lock'}
-            </span>
-            <span>Reset</span>
-            {!isAdmin && (
-              <span className="text-[9px] uppercase font-mono px-1 py-0.2 rounded bg-[#ba1a1a]/15 text-[#ba1a1a] font-bold">
-                Admin
-              </span>
-            )}
-          </button>
-
+          {isAdmin && (
+            <button
+              id="btnClearRecords"
+              type="button"
+              onClick={onClearRecords}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all cursor-pointer text-[#ba1a1a] bg-[#ffdad6]/40 hover:bg-[#ffdad6]/80 border border-[#ba1a1a]/30 shadow-2xs"
+              title="Kosongkan riwayat presensi (Akses Admin Aktif)"
+            >
+              <span className="material-symbols-outlined text-[17px]">delete_sweep</span>
+              <span>Reset</span>
+            </button>
+          )}
           {/* Admin Toggle / Status */}
           {isAdmin ? (
             <button
               id="btnLogoutAdminRoster"
               type="button"
               onClick={onLogoutAdmin}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#f6f1f1] hover:bg-[#fee2e2] text-[#75777d] hover:text-[#ba1a1a] text-xs font-medium transition-all cursor-pointer border border-[#f0e6e7]"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#f6f1f1] hover:bg-[#fee2e2] text-[#67585b] hover:text-[#ba1a1a] text-sm font-medium transition-all cursor-pointer border border-[#f0e6e7]"
               title="Keluar dari sesi Administrator"
             >
               <span className="material-symbols-outlined text-[15px]">logout</span>
@@ -141,7 +126,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
               id="btnLoginAdminRoster"
               type="button"
               onClick={onOpenAdminLogin}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#5a0f18]/10 hover:bg-[#5a0f18]/20 text-[#5a0f18] text-xs font-semibold transition-all cursor-pointer border border-[#5a0f18]/20"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#5a0f18]/10 hover:bg-[#5a0f18]/20 text-[#5a0f18] text-sm font-semibold transition-all cursor-pointer border border-[#5a0f18]/20"
               title="Buka dialog login administrator KPU"
             >
               <span className="material-symbols-outlined text-[15px]">admin_panel_settings</span>
@@ -155,13 +140,13 @@ export const RosterTable: React.FC<RosterTableProps> = ({
         <div className="mb-4 grid grid-cols-1 sm:grid-cols-[1fr_190px] gap-3">
           <label className="relative">
             <span className="sr-only">Cari peserta</span>
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#75777d]">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-[#67585b]">search</span>
             <input
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Cari nama, instansi, email, No. HP, atau nomor..."
-              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
+              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-base focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
             />
           </label>
           <label>
@@ -169,7 +154,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as 'Semua' | AttendanceRecord['status'])}
-              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
+              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] px-3 py-2.5 text-base focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
             >
               <option value="Semua">Semua status</option>
               <option value="Tervalidasi">Tervalidasi</option>
@@ -183,7 +168,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
         <div className="mb-4">
           <label className="relative block">
             <span className="sr-only">Cari nama peserta atau instansi</span>
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#75777d]">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-[#67585b]">search</span>
             <input
               type="search"
               value={publicQuery}
@@ -192,7 +177,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                 setPublicPage(1);
               }}
               placeholder="Cari nama, nomor sertifikat, atau institusi..."
-              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-sm focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
+              className="w-full rounded-xl border border-[#d5cbcd] bg-[#fbf9f9] py-2.5 pl-10 pr-3 text-base focus:border-[#5a0f18] focus:outline-none focus:ring-2 focus:ring-[#5a0f18]/20"
             />
           </label>
         </div>
@@ -201,9 +186,9 @@ export const RosterTable: React.FC<RosterTableProps> = ({
       {/* Responsive Table */}
       <div className="overflow-x-auto">
         {isAdmin ? (
-        <table id="rosterTable" className="w-full text-left text-xs">
+        <table id="rosterTable" className="w-full text-left text-sm">
           <thead>
-            <tr className="bg-[#f6f1f1] text-[#75777d] font-mono text-[11px] uppercase tracking-wider">
+            <tr className="bg-[#f6f1f1] text-[#67585b] font-mono text-sm uppercase tracking-wider">
               <th className="py-3 px-4 rounded-l-lg">Waktu Masuk</th>
               <th className="py-3 px-4">Nama Peserta</th>
               <th className="py-3 px-4">Instansi/Organisasi Asal</th>
@@ -217,7 +202,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
           <tbody id="rosterTableBody" className="divide-y divide-[#f0e6e7]">
             {filteredRecords.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-[#75777d]">
+                <td colSpan={8} className="py-8 text-center text-[#67585b]">
                   {isAdmin
                     ? records.length === 0
                       ? 'Belum ada catatan presensi tersimpan di Supabase.'
@@ -231,24 +216,24 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                   key={rec.id}
                   className="hover:bg-[#f6f1f1]/60 transition-colors"
                 >
-                  <td className="py-3.5 px-4 font-mono text-[11px] text-[#75777d]">
+                  <td className="py-3.5 px-4 font-mono text-sm text-[#67585b]">
                     {rec.timestamp}
                   </td>
-                  <td className="py-3.5 px-4 font-bold text-[#5a0f18] text-xs">
+                  <td className="py-3.5 px-4 font-bold text-[#5a0f18] text-sm">
                     {rec.name}
                   </td>
                   <td className="py-3.5 px-4 text-[#201112]">{rec.instansi}</td>
-                  <td className="py-3.5 px-4 text-[#534344] font-mono text-[11px]">
+                  <td className="py-3.5 px-4 text-[#534344] font-mono text-sm">
                     {rec.email}
                   </td>
-                  <td className="py-3.5 px-4 text-[#534344] font-mono text-[11px] whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-[#534344] font-mono text-sm whitespace-nowrap">
                     {rec.phone || '-'}
                   </td>
                   <td className="py-3.5 px-4 font-mono font-bold text-[#5a0f18]">
                     {rec.serial}
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full bg-[#5a0f18]/10 text-[#5a0f18] font-bold">
+                    <span className="inline-flex items-center gap-1 font-mono text-sm px-2 py-0.5 rounded-full bg-[#5a0f18]/10 text-[#5a0f18] font-bold">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#5a0f18]" />
                       {rec.status}
                     </span>
@@ -258,7 +243,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                       <button
                         type="button"
                         onClick={() => onSelectRecord(rec)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-[#5a0f18] hover:text-white text-[#5a0f18] text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-[#5a0f18] hover:text-white text-[#5a0f18] text-sm font-semibold transition-all cursor-pointer shadow-2xs"
                       >
                         <span className="material-symbols-outlined text-[15px]">visibility</span>
                         <span>Tampilkan</span>
@@ -266,7 +251,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
                       <button
                         type="button"
                         onClick={() => onManageRecord(rec)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-sm font-semibold transition-all cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[15px]">manage_accounts</span>
                         <span>Kelola</span>
@@ -279,9 +264,9 @@ export const RosterTable: React.FC<RosterTableProps> = ({
           </tbody>
         </table>
         ) : (
-          <table id="publicRosterTable" className="w-full text-left text-xs">
+          <table id="publicRosterTable" className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-[#f6f1f1] text-[#75777d] font-mono text-[11px] uppercase tracking-wider">
+              <tr className="bg-[#f6f1f1] text-[#67585b] font-mono text-sm uppercase tracking-wider">
                 <th className="py-3 px-4 rounded-l-lg">Nama Peserta</th>
                 <th className="py-3 px-4">Nomor Sertifikat</th>
                 <th className="py-3 px-4 rounded-r-lg">Instansi/Organisasi Asal</th>
@@ -290,7 +275,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
             <tbody className="divide-y divide-[#f0e6e7]">
               {paginatedPublicRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="py-8 text-center text-[#75777d]">
+                  <td colSpan={3} className="py-8 text-center text-[#67585b]">
                     {publicRecords.length === 0
                       ? 'Belum ada peserta yang tercatat.'
                       : 'Nama peserta atau instansi tidak ditemukan.'}
@@ -299,7 +284,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
               ) : (
                 paginatedPublicRecords.map((record) => (
                   <tr key={record.id} className="hover:bg-[#f6f1f1]/60 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-[#5a0f18] text-xs">{record.name}</td>
+                    <td className="py-3.5 px-4 font-bold text-[#5a0f18] text-sm">{record.name}</td>
                     <td className="py-3.5 px-4 font-mono font-bold text-[#5a0f18]">{record.serial}</td>
                     <td className="py-3.5 px-4 text-[#201112]">{record.instansi}</td>
                   </tr>
@@ -312,7 +297,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
 
       {!isAdmin && filteredPublicRecords.length > 0 && (
         <div className="mt-4 flex flex-col gap-3 border-t border-[#f0e6e7] pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#534344]">
+          <p className="text-sm text-[#534344]">
             Menampilkan {(publicPage - 1) * PUBLIC_PAGE_SIZE + 1}–{Math.min(publicPage * PUBLIC_PAGE_SIZE, filteredPublicRecords.length)} dari {filteredPublicRecords.length} peserta
           </p>
           <nav className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:flex sm:w-auto sm:gap-2" aria-label="Paginasi daftar peserta">
@@ -320,12 +305,12 @@ export const RosterTable: React.FC<RosterTableProps> = ({
               type="button"
               disabled={publicPage === 1}
               onClick={() => setPublicPage((page) => Math.max(1, page - 1))}
-              className="inline-flex items-center justify-center gap-0.5 whitespace-nowrap rounded-lg border border-[#d5cbcd] bg-white px-2 py-2 text-[11px] font-semibold text-[#5a0f18] transition-colors hover:bg-[#f6f1f1] disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1 sm:px-3 sm:text-xs"
+              className="inline-flex items-center justify-center gap-0.5 whitespace-nowrap rounded-lg border border-[#d5cbcd] bg-white px-2 py-2 text-sm font-semibold text-[#5a0f18] transition-colors hover:bg-[#f6f1f1] disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1 sm:px-3 sm:text-sm"
             >
               <span className="material-symbols-outlined text-[16px]">chevron_left</span>
               <span className="hidden min-[360px]:inline">Sebelumnya</span>
             </button>
-            <span className="whitespace-nowrap text-center text-[11px] font-medium text-[#534344] sm:min-w-24 sm:text-xs">
+            <span className="whitespace-nowrap text-center text-sm font-medium text-[#534344] sm:min-w-24 sm:text-sm">
               <span className="min-[360px]:hidden">{publicPage}/{publicPageCount}</span>
               <span className="hidden min-[360px]:inline">Halaman {publicPage} dari {publicPageCount}</span>
             </span>
@@ -333,7 +318,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
               type="button"
               disabled={publicPage === publicPageCount}
               onClick={() => setPublicPage((page) => Math.min(publicPageCount, page + 1))}
-              className="inline-flex items-center justify-center gap-0.5 whitespace-nowrap rounded-lg border border-[#d5cbcd] bg-white px-2 py-2 text-[11px] font-semibold text-[#5a0f18] transition-colors hover:bg-[#f6f1f1] disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1 sm:px-3 sm:text-xs"
+              className="inline-flex items-center justify-center gap-0.5 whitespace-nowrap rounded-lg border border-[#d5cbcd] bg-white px-2 py-2 text-sm font-semibold text-[#5a0f18] transition-colors hover:bg-[#f6f1f1] disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1 sm:px-3 sm:text-sm"
             >
               <span className="hidden min-[360px]:inline">Berikutnya</span>
               <span className="material-symbols-outlined text-[16px]">chevron_right</span>
@@ -342,7 +327,8 @@ export const RosterTable: React.FC<RosterTableProps> = ({
         </div>
       )}
 
-      {/* Card Ekspor CSV pada Bagian Log Presensi Peserta */}
+      {/* Ekspor CSV hanya ditampilkan untuk administrator yang sudah login. */}
+      {isAdmin && (
       <div
         id="card-export-log-csv"
         className="mt-6 pt-5 border-t border-[#f0e6e7] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#fbf9f9] border border-[#d5cbcd]/40"
@@ -353,22 +339,22 @@ export const RosterTable: React.FC<RosterTableProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-xs sm:text-sm font-bold text-[#201112]">
+              <h4 className="text-sm sm:text-base font-bold text-[#201112]">
                 Ekspor Log Presensi Peserta (.CSV)
               </h4>
               {isAdmin ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-sm font-bold font-mono">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                   Admin Terverifikasi
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold font-mono">
-                  <span className="material-symbols-outlined text-[12px]">lock</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-sm font-bold font-mono">
+                  <span className="material-symbols-outlined text-sm">lock</span>
                   Proteksi Admin
                 </span>
               )}
             </div>
-            <p className="text-[11px] sm:text-xs text-[#534344] mt-0.5">
+            <p className="text-sm sm:text-sm text-[#534344] mt-0.5">
               Unduh seluruh riwayat rekap presensi ({records.length} peserta) ke dalam format berkas spreadsheet CSV.
             </p>
           </div>
@@ -378,7 +364,7 @@ export const RosterTable: React.FC<RosterTableProps> = ({
           id="btnCardExportCSV"
           type="button"
           onClick={onExportCSV}
-          className={`w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm ${
+          className={`w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer shadow-sm ${
             isAdmin
               ? 'bg-[#5a0f18] hover:bg-[#3d080e] text-white'
               : 'bg-white hover:bg-[#f6f1f1] text-[#5a0f18] border border-[#5a0f18]/30 shadow-2xs'
@@ -394,12 +380,13 @@ export const RosterTable: React.FC<RosterTableProps> = ({
           </span>
           <span>Ekspor CSV</span>
           {!isAdmin && (
-            <span className="text-[9px] uppercase font-mono px-1.5 py-0.2 rounded bg-[#5a0f18]/15 text-[#5a0f18] font-bold">
+            <span className="text-sm uppercase font-mono px-1.5 py-0.2 rounded bg-[#5a0f18]/15 text-[#5a0f18] font-bold">
               Admin
             </span>
           )}
         </button>
       </div>
+      )}
     </div>
   );
 };

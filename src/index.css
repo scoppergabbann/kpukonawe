@@ -13,3 +13,47 @@
 .font-sans-ui {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* Shared reading and touch sizes for participant and administrator screens. */
+body {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]), select, textarea) {
+  min-height: 52px;
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 1.5;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+:where(input, textarea)::placeholder {
+  color: #77686a;
+  opacity: 1;
+}
+
+:where(button) {
+  min-height: 44px;
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid #8b3341;
+  outline-offset: 3px;
+}
+
+:where(th, td) {
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  #bottom-tab-section > div:first-child {
+    flex-wrap: wrap;
+  }
+
+  #bottom-tab-section > div:first-child > button {
+    width: 100%;
+    text-align: left;
+  }
+}

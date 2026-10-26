@@ -13,21 +13,21 @@ export const EventInfoCard: React.FC = () => {
         >
           <span className="material-symbols-outlined text-[20px]">menu_book</span>
         </div>
-        <h3 className="text-sm font-bold text-[#5a0f18]">
+        <h3 className="text-base font-bold text-[#5a0f18]">
           Tentang Diskusi Kepemiluan &amp; Penyelenggara
         </h3>
       </div>
 
-      <div className="space-y-3 text-xs text-[#534344]">
+      <div className="space-y-3 text-sm text-[#534344]">
         <div className="p-3 rounded-xl bg-[#f6f1f1] flex items-start gap-3 border border-[#f0e6e7]">
           <span className="material-symbols-outlined text-[#5a0f18] text-[20px] shrink-0 mt-0.5">
             location_city
           </span>
           <div>
-            <strong className="text-[#201112] block font-semibold text-xs">
+            <strong className="text-[#201112] block font-semibold text-sm">
               Komisi Pemilihan Umum Kabupaten Konawe
             </strong>
-            <span className="text-[11px] text-[#534344] leading-relaxed">
+            <span className="text-sm text-[#534344] leading-relaxed">
               Penyelenggara resmi kegiatan Diskusi Kepemiluan.
             </span>
           </div>
@@ -38,10 +38,10 @@ export const EventInfoCard: React.FC = () => {
             edit_document
           </span>
           <div>
-            <strong className="text-[#201112] block font-semibold text-xs">
+            <strong className="text-[#201112] block font-semibold text-sm">
               Tema Diskusi Kepemiluan
             </strong>
-            <span className="text-[11px] text-[#534344] leading-relaxed">
+            <span className="text-sm text-[#534344] leading-relaxed">
               Komunikasi Politik di Era Digital: Pendekatan Praktis,
               Implementatif, dan Berbasis Lapangan
             </span>
@@ -53,10 +53,10 @@ export const EventInfoCard: React.FC = () => {
             timer
           </span>
           <div>
-            <strong className="text-[#201112] block font-semibold text-xs">
+            <strong className="text-[#201112] block font-semibold text-sm">
               Beban Pembelajaran Resmi
             </strong>
-            <span className="text-[11px] text-[#534344] leading-relaxed">
+            <span className="text-sm text-[#534344] leading-relaxed">
               Setara 2 (dua) jam pelajaran bersertifikat resmi KPU Konawe ditandatangani
               Ketua KPU (Wike).
             </span>

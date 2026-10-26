@@ -20,18 +20,18 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span
               id="badge-kpu-institution"
-              className="text-[11px] px-2.5 py-1 rounded-full bg-[#5a0f18] text-white font-bold uppercase tracking-wider font-mono shadow-xs"
+              className="text-sm px-2.5 py-1 rounded-full bg-[#5a0f18] text-white font-bold uppercase tracking-wider font-mono shadow-xs"
             >
               Komisi Pemilihan Umum
             </span>
             <span
               id="badge-status-active"
-              className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-[#f0e6e7] text-[#5a0f18] font-semibold"
+              className="flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-full bg-[#f0e6e7] text-[#5a0f18] font-semibold"
             >
               <span className="w-2 h-2 rounded-full bg-[#5a0f18] animate-pulse" />
               Presensi Daring Aktif
             </span>
-            <span className="text-[11px] text-[#534344] font-medium">
+            <span className="text-sm text-[#534344] font-medium">
               Kabupaten Konawe • Durasi 2 Jam Pelajaran
             </span>
           </div>
@@ -46,7 +46,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
           </h1>
 
           {/* Subtitle Details */}
-          <p className="text-sm text-[#534344] mt-3 leading-relaxed">
+          <p className="text-base text-[#534344] mt-3 leading-relaxed">
             Penyelenggara:{' '}
             <strong className="text-[#201112] font-semibold">
               Komisi Pemilihan Umum Kabupaten Konawe
@@ -66,7 +66,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
               <span className="material-symbols-outlined text-[22px]">group</span>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#75777d] block font-mono">
+              <span className="text-sm uppercase font-bold tracking-wider text-[#67585b] block font-mono">
                 Peserta Terdaftar
               </span>
               <span
@@ -86,7 +86,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
               <span className="material-symbols-outlined text-[22px]">verified</span>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#5a0f18] block font-mono">
+              <span className="text-sm uppercase font-bold tracking-wider text-[#5a0f18] block font-mono">
                 Status Penerbitan
               </span>
               <span className="text-xl font-bold text-[#5a0f18] tracking-tight">

@@ -21,9 +21,9 @@ export const Header: React.FC<HeaderProps> = ({
       id="main-header"
       className="fixed top-0 w-full z-50 bg-[#ffffff]/95 backdrop-blur-xl border-b border-[#f0e6e7] shadow-[0_1px_8px_rgba(90,15,24,0.05)]"
     >
-      <div className="h-20 w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+      <div className="h-20 w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
         {/* Brand Left */}
-        <div className="flex items-center gap-4 lg:gap-6">
+        <div className="flex items-center gap-3 lg:gap-4">
           <div className="flex items-center gap-3">
             <div
               id="kpu-logo-icon"
@@ -44,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
                   &amp; E-Sertifikat
                 </span>
               </div>
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-[#75777d] block font-mono">
+              <span className="text-sm font-semibold tracking-wider uppercase text-[#67585b] hidden min-[360px]:block ">
                 Portal Presensi Resmi
               </span>
             </div>
@@ -53,16 +53,16 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Active Event Indicator */}
           <div
             id="event-ticker-badge"
-            className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f6f1f1] border border-[#f0e6e7]"
+            className="hidden min-[1800px]:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f6f1f1] border border-[#f0e6e7]"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5a0f18] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5a0f18]"></span>
             </span>
-            <span className="text-xs font-medium text-[#201112] truncate max-w-sm">
-              Sistem Pemilu Indonesia &quot;Desain, Regulasi dan Tata Kelola Penyelenggaraan&quot; - Penataan Daerah Pemilihan (Dapil)
+            <span className="text-sm font-medium text-[#201112] truncate max-w-48">
+              Diskusi Kepemiluan: Komunikasi Politik di Era Digital
             </span>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#5a0f18]/10 text-[#5a0f18]">
+            <span className="text-sm font-bold px-1.5 py-0.5 rounded bg-[#5a0f18]/10 text-[#5a0f18]">
               KPU
             </span>
           </div>
@@ -71,13 +71,13 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Center Nav Links */}
         <nav
           id="top-nav-bar"
-          className="hidden lg:flex items-center gap-1.5 p-1 rounded-xl bg-[#f6f1f1] border border-[#f0e6e7]"
+          className="hidden 2xl:flex items-center gap-1.5 p-1 rounded-xl bg-[#f6f1f1] border border-[#f0e6e7]"
         >
           <button
             id="nav-btn-presensi"
             type="button"
             onClick={() => onSelectTab('presensi-dan-unduh-sertifikat')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-3.5 py-2 text-sm font-semibold rounded-lg transition-all ${
               activeTab === 'presensi-dan-unduh-sertifikat'
                 ? 'bg-[#5a0f18] text-white shadow-sm'
                 : 'text-[#534344] hover:text-[#201112] hover:bg-white/60'
@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
             id="nav-btn-riwayat"
             type="button"
             onClick={() => onSelectTab('riwayat-kehadiran')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-3.5 py-2 text-sm font-semibold rounded-lg transition-all ${
               activeTab === 'riwayat-kehadiran'
                 ? 'bg-[#5a0f18] text-white shadow-sm'
                 : 'text-[#534344] hover:text-[#201112] hover:bg-white/60'
@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
             id="nav-btn-info"
             type="button"
             onClick={() => onSelectTab('informasi-kegiatan')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-3.5 py-2 text-sm font-semibold rounded-lg transition-all ${
               activeTab === 'informasi-kegiatan'
                 ? 'bg-[#5a0f18] text-white shadow-sm'
                 : 'text-[#534344] hover:text-[#201112] hover:bg-white/60'
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
             id="btnHeaderCertificateRecovery"
             type="button"
             onClick={() => onSelectTab('unduh-ulang-sertifikat')}
-            className={`flex h-9 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-all sm:px-3 ${
+            className={`flex h-9 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-sm font-semibold transition-all sm:px-3 ${
               activeTab === 'unduh-ulang-sertifikat'
                 ? 'border-[#5a0f18] bg-[#5a0f18] text-white shadow-sm'
                 : 'border-[#5a0f18]/20 bg-white text-[#5a0f18] hover:bg-[#5a0f18]/10'
@@ -130,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
           <div
             id="date-display-badge"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f6f1f1] text-[#534344] border border-[#f0e6e7] text-xs font-medium"
+            className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f6f1f1] text-[#534344] border border-[#f0e6e7] text-sm font-medium"
           >
             <span className="material-symbols-outlined text-[16px] text-[#5a0f18]">
               calendar_today
@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-[#f0e6e7]"
             >
               <div
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold "
                 title="Sesi Administrator KPU Aktif"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
@@ -154,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
                 id="btnHeaderLogoutAdmin"
                 type="button"
                 onClick={onLogoutAdmin}
-                className="p-1.5 rounded-lg text-[#75777d] hover:text-[#ba1a1a] hover:bg-[#fee2e2] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#67585b] hover:text-[#ba1a1a] hover:bg-[#fee2e2] transition-colors cursor-pointer"
                 title="Keluar dari sesi Admin"
               >
                 <span className="material-symbols-outlined text-[18px]">logout</span>
@@ -165,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
               id="btnHeaderLoginAdmin"
               type="button"
               onClick={onOpenAdminLogin}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-[#5a0f18]/10 text-[#5a0f18] border border-[#5a0f18]/25 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f6f1f1] hover:bg-[#5a0f18]/10 text-[#5a0f18] border border-[#5a0f18]/25 text-sm font-semibold transition-all cursor-pointer shadow-2xs"
               title="Masuk sebagai Administrator KPU"
             >
               <span className="material-symbols-outlined text-[17px]">lock</span>

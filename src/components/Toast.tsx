@@ -21,8 +21,8 @@ export const Toast: React.FC<ToastProps> = ({ toast }) => {
           : 'check_circle'}
       </span>
       <div>
-        <h4 className="text-xs font-bold text-white tracking-wide">{toast.title}</h4>
-        <p className="text-[11px] text-[#ffdcc3] mt-0.5">{toast.message}</p>
+        <h4 className="text-sm font-bold text-white tracking-wide">{toast.title}</h4>
+        <p className="text-sm text-[#ffdcc3] mt-0.5">{toast.message}</p>
       </div>
     </div>
   );
