@@ -442,39 +442,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               onChange={handleTemplateFileUpload}
             />
 
-            <button
-              id="btnUploadTemplate"
-              type="button"
-              onClick={handleTriggerUpload}
-              title={
-                isAdmin
-                  ? 'Unggah template sertifikat baru (PDF atau Gambar JPG/PNG)'
-                  : 'Akses Terproteksi Admin: Unggah template sertifikat baru'
-              }
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all border cursor-pointer shadow-2xs ${
-                isAdmin
-                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300'
-                  : 'bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#5a0f18] border-[#d5cbcd]/60'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">upload_file</span>
-              <span>Unggah Template Baru</span>
-              {!isAdmin ? (
-                <span
-                  className="material-symbols-outlined text-sm text-amber-700 ml-0.5"
-                  title="Memerlukan Login Administrator KPU"
-                >
-                  lock
-                </span>
-              ) : (
-                <span
-                  className="material-symbols-outlined text-sm text-emerald-700 ml-0.5"
-                  title="Akses Administrator Terverifikasi"
-                >
-                  verified
-                </span>
-              )}
-            </button>
+
 
             {isCustomTemplate && (
               <button
@@ -525,7 +493,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className={`material-symbols-outlined text-[18px] text-[#ffdcc3] ${isExportingPDF ? 'animate-spin' : ''}`}>
                 {isExportingPDF ? 'sync' : 'picture_as_pdf'}
               </span>
-              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload && (!isCertificateReady) ? 'Menyiapkan sertifikat...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
+              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload && (!isCertificateReady) ? 'Menyiapkan sertifikat...' : canDownload ? 'Download PDF' : 'Download PDF Terkunci'}</span>
             </button>
 
             <button
@@ -539,16 +507,11 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className="material-symbols-outlined text-[18px] text-[#5a0f18]">
                 image
               </span>
-              <span>{canDownload && (!isCertificateReady) ? 'Menyiapkan sertifikat...' : canDownload ? 'JPG' : 'JPG Terkunci'}</span>
+              <span>{canDownload && (!isCertificateReady) ? 'Menyiapkan sertifikat...' : canDownload ? 'Download JPG' : 'Download JPG Terkunci'}</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-sm font-mono text-[#67585b]">
-            <span className="material-symbols-outlined text-[15px] text-[#5a0f18]">
-              verified
-            </span>
-            <span>Format Resmi KPU Kab. Konawe</span>
-          </div>
+
         </div>
       </div>
     </div>

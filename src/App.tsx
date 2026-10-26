@@ -578,10 +578,8 @@ export default function App() {
           {/* Hero Banner */}
           <HeroBanner attendeeCount={participantCount} />
 
-          {/* 2-Column Split Workspace */}
-          <div className={`grid grid-cols-1 gap-6 items-start ${issuedRecord ? 'xl:grid-cols-12' : 'mx-auto max-w-3xl'}`}>
-            {/* Left Column (5 cols): Registration Form + Info Card */}
-            <div className={`${issuedRecord ? 'xl:col-span-5' : ''} flex flex-col gap-6`}>
+          {/* Formulir diikuti langsung oleh kartu unduhan sertifikat. */}
+          <div className="mx-auto flex max-w-3xl flex-col gap-6">
               <AttendanceForm
                 name={name}
                 setName={(value) => updateDraft(setName, value)}
@@ -600,12 +598,8 @@ export default function App() {
                 onReset={handleResetForm}
               />
 
-              <EventInfoCard />
-            </div>
-
             {/* Opsi unduh hanya muncul setelah presensi atau pemulihan berhasil. */}
             {issuedRecord && (
-              <div className="xl:col-span-7 flex flex-col gap-6 sticky top-24">
                 <CertificateCanvas
                   ref={certCanvasRef}
                   name={issuedRecord.name}
@@ -616,8 +610,8 @@ export default function App() {
                   onShowToast={showToast}
                   onOpenAdminLogin={handleOpenAdminLoginForAction}
                 />
-              </div>
             )}
+            <EventInfoCard />
           </div>
 
           {isAdmin && (
