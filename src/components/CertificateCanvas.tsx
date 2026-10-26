@@ -7,6 +7,9 @@ import {
   uploadCertificateTemplate,
 } from '../lib/supabase-api';
 
+// Set to true to restore QR generation and verification marks on certificates.
+const CERTIFICATE_QR_ENABLED = false;
+
 export interface CertificateCanvasHandle {
   triggerUpload: () => void;
   resetTemplate: () => void;
@@ -37,6 +40,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   const [customTemplateName, setCustomTemplateName] = useState<string>('');
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isQrReady, setIsQrReady] = useState(false);
+  const isCertificateReady = templateLoaded && (!CERTIFICATE_QR_ENABLED || isQrReady);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const qrImageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -239,7 +243,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
       }
 
       const qrImage = qrImageRef.current;
-      if (qrImage && cleanSerial) {
+      if (CERTIFICATE_QR_ENABLED && qrImage && cleanSerial) {
         // Clear area to the right of the signature, above the decorative lower edge.
         const qrX = 805;
         const qrY = 592;
@@ -265,7 +269,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   }, [renderCertificateToCanvas]);
 
   useEffect(() => {
-    if (!verificationId || !serial) {
+    if (!CERTIFICATE_QR_ENABLED || !verificationId || !serial) {
       qrImageRef.current = null;
       setIsQrReady(false);
       drawCertificate();
@@ -291,7 +295,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle Ultra-HD JPG Download (rendered at 2x master resolution)
   const handleDownloadJPG = () => {
-    if (!canDownload || !isQrReady || !templateLoaded) {
+    if (!canDownload || !isCertificateReady) {
       onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan JPG dapat dibuka.', 'warning');
       return;
     }
@@ -324,8 +328,8 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle True 300 DPI Ultra-HD PDF Generation & Direct Download
   const handleDownloadPDF = async () => {
-    if (isExportingPDF || !canDownload || !isQrReady || !templateLoaded) {
-      if (!canDownload || !isQrReady || !templateLoaded) {
+    if (isExportingPDF || !canDownload || !isCertificateReady) {
+      if (!canDownload || !isCertificateReady) {
         onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan PDF dapat dibuka.', 'warning');
       }
       return;
@@ -513,7 +517,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
             <button
               id="btnDownloadPDF"
               type="button"
-              disabled={isExportingPDF || !canDownload || !isQrReady || !templateLoaded}
+              disabled={isExportingPDF || !canDownload || !isCertificateReady}
               onClick={handleDownloadPDF}
               title={canDownload ? 'Unduh sertifikat dalam format PDF' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5a0f18] hover:bg-[#3d080e] text-white text-sm font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
@@ -521,13 +525,13 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className={`material-symbols-outlined text-[18px] text-[#ffdcc3] ${isExportingPDF ? 'animate-spin' : ''}`}>
                 {isExportingPDF ? 'sync' : 'picture_as_pdf'}
               </span>
-              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload && (!isQrReady || !templateLoaded) ? 'Menyiapkan sertifikat...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
+              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload && (!isCertificateReady) ? 'Menyiapkan sertifikat...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
             </button>
 
             <button
               id="btnDownloadJPG"
               type="button"
-              disabled={!canDownload || !isQrReady || !templateLoaded}
+              disabled={!canDownload || !isCertificateReady}
               onClick={handleDownloadJPG}
               title={canDownload ? 'Unduh sertifikat dalam format JPG' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] text-sm font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
@@ -535,7 +539,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className="material-symbols-outlined text-[18px] text-[#5a0f18]">
                 image
               </span>
-              <span>{canDownload && (!isQrReady || !templateLoaded) ? 'Menyiapkan sertifikat...' : canDownload ? 'JPG' : 'JPG Terkunci'}</span>
+              <span>{canDownload && (!isCertificateReady) ? 'Menyiapkan sertifikat...' : canDownload ? 'JPG' : 'JPG Terkunci'}</span>
             </button>
           </div>
 
