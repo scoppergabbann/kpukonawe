@@ -11,7 +11,7 @@ export const ActivityGuide: React.FC = () => {
           Informasi Kegiatan &amp; Tata Tertib E-Sertifikat
         </h3>
         <p className="text-xs text-[#534344] mt-1">
-          Ketentuan resmi penerbitan dan pengunduhan e-sertifikat peserta bedah buku KPU
+          Ketentuan resmi penerbitan dan pengunduhan e-sertifikat peserta diskusi kepemiluan KPU
           Kabupaten Konawe.
         </p>
       </div>
@@ -53,8 +53,7 @@ export const ActivityGuide: React.FC = () => {
           <h4 className="text-sm font-bold text-[#5a0f18]">KPU Kabupaten Konawe</h4>
           <p className="text-xs text-[#534344] leading-relaxed">
             Sertifikat ini disahkan secara institusional oleh Ketua KPU Kabupaten Konawe
-            (Wike) atas partisipasi aktif dalam agenda bedah buku penataan daerah pemilihan
-            (Dapil).
+            (Wike) atas partisipasi aktif dalam diskusi komunikasi politik di era digital.
           </p>
           <div className="p-2 mt-auto rounded bg-white text-[11px] font-mono text-[#75777d] border border-[#f0e6e7]">
             Otoritas: Komisi Pemilihan Umum Kab. Konawe

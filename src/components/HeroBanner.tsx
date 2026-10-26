@@ -41,8 +41,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
             id="event-main-title"
             className="text-2xl sm:text-3xl lg:text-[32px] font-bold text-[#5a0f18] tracking-tight leading-tight"
           >
-            Sistem Pemilu Indonesia &quot;Desain, Regulasi dan Tata Kelola
-            Penyelenggaraan&quot; - Penataan Daerah Pemilihan (Dapil)
+            Diskusi Kepemiluan: Komunikasi Politik di Era Digital —
+            Pendekatan Praktis, Implementatif, dan Berbasis Lapangan
           </h1>
 
           {/* Subtitle Details */}
@@ -51,7 +51,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
             <strong className="text-[#201112] font-semibold">
               Komisi Pemilihan Umum Kabupaten Konawe
             </strong>{' '}
-            • Tanggal: <span className="font-semibold text-[#5a0f18]">8 September 2026</span> •
+            • Tanggal: <span className="font-semibold text-[#5a0f18]">28 Oktober 2026</span> •
             Diterbitkan resmi untuk seluruh peserta yang telah mengisi presensi kehadiran.
           </p>
         </div>

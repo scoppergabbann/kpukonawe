@@ -135,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="material-symbols-outlined text-[16px] text-[#5a0f18]">
               calendar_today
             </span>
-            <span>8 September 2026</span>
+            <span>28 Oktober 2026</span>
           </div>
           {/* Admin Auth Badge / Action */}
           {isAdmin ? (

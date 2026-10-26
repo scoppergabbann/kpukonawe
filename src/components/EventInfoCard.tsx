@@ -14,7 +14,7 @@ export const EventInfoCard: React.FC = () => {
           <span className="material-symbols-outlined text-[20px]">menu_book</span>
         </div>
         <h3 className="text-sm font-bold text-[#5a0f18]">
-          Tentang Bedah Buku &amp; Penyelenggara
+          Tentang Diskusi Kepemiluan &amp; Penyelenggara
         </h3>
       </div>
 
@@ -28,7 +28,7 @@ export const EventInfoCard: React.FC = () => {
               Komisi Pemilihan Umum Kabupaten Konawe
             </strong>
             <span className="text-[11px] text-[#534344] leading-relaxed">
-              Penyelenggara resmi sosialisasi dan bedah regulasi kepemiluan nasional.
+              Penyelenggara resmi kegiatan Diskusi Kepemiluan.
             </span>
           </div>
         </div>
@@ -39,11 +39,11 @@ export const EventInfoCard: React.FC = () => {
           </span>
           <div>
             <strong className="text-[#201112] block font-semibold text-xs">
-              Buku Referensi Pemilu
+              Tema Diskusi Kepemiluan
             </strong>
             <span className="text-[11px] text-[#534344] leading-relaxed">
-              Sistem Pemilu Indonesia &quot;Desain, Regulasi dan Tata Kelola
-              Penyelenggaraan&quot; - Penataan Daerah Pemilihan (Dapil)
+              Komunikasi Politik di Era Digital: Pendekatan Praktis,
+              Implementatif, dan Berbasis Lapangan
             </span>
           </div>
         </div>

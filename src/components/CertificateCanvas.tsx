@@ -41,39 +41,27 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   const qrImageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Official high-res template image URL
-  const DEFAULT_TEMPLATE_URL = '/certificate_template.jpg';
-  const FALLBACK_REMOTE_URL =
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuBvE0XwcU4OB1A7X1BnVMlyLYql-X4H3agBMzJJBrSltP42E4tjE22f7SL1dqaYzItVLZzOx5mSnYwXI6aePKFtKqTV7XYma-4MIBHS22-xhd8uWV191mNIJqHQFYkAfN7j-pvDvig3z8tcDAs7FQ7DcWJfxLHq8KA_EOUNoeCOoCqLajgQNnOtddxVWiNxv5Psxq_8EJC5E37dKFGw_YlI7Umkp7VfSGFfrtgr8DcrFhxFbvDhikdvIpSi0ES76F-_vA';
+  const DEFAULT_TEMPLATE_URL = '/certificate-diskusi-kepemiluan-2026-10-28.jpg';
 
-  // Load template image (saved custom template or default HD asset)
   const loadTemplateFromSource = useCallback((src: string, isCustom = false, fileName = '') => {
     setTemplateLoaded(false);
+    imageRef.current = null;
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = src;
     img.onload = () => {
       imageRef.current = img;
-      setTemplateLoaded(true);
       setIsCustomTemplate(isCustom);
-      if (isCustom && fileName) {
-        setCustomTemplateName(fileName);
-      }
+      setCustomTemplateName(isCustom ? fileName : '');
+      setTemplateLoaded(true);
     };
     img.onerror = () => {
-      // Fallback to default
-      const fallbackImg = new Image();
-      fallbackImg.crossOrigin = 'anonymous';
-      fallbackImg.src = FALLBACK_REMOTE_URL;
-      fallbackImg.onload = () => {
-        imageRef.current = fallbackImg;
-        setTemplateLoaded(true);
-        setIsCustomTemplate(false);
-      };
-      fallbackImg.onerror = () => {
-        setTemplateLoaded(true);
-      };
+      if (src !== DEFAULT_TEMPLATE_URL) {
+        loadTemplateFromSource(DEFAULT_TEMPLATE_URL);
+      } else {
+        console.error('Template sertifikat resmi tidak dapat dimuat.');
+      }
     };
+    img.src = src;
   }, []);
 
   // Upload custom template (PDF or Image)
@@ -203,136 +191,68 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   };
 
   useEffect(() => {
+    let active = true;
+    loadTemplateFromSource(DEFAULT_TEMPLATE_URL);
     void downloadCertificateTemplate().then((template) => {
-      if (template) loadTemplateFromSource(template.url, true, template.name);
-      else loadTemplateFromSource(DEFAULT_TEMPLATE_URL, false);
+      if (active && template) loadTemplateFromSource(template.url, true, template.name);
+    }).catch(() => {
+      // The bundled official template stays available if Storage cannot be reached.
     });
+    return () => { active = false; };
   }, [loadTemplateFromSource]);
 
-  // Master rendering engine: renders certificate onto any canvas at any target resolution
+  // All overlays use the 1152 x 768 coordinate space of the supplied PDF.
   const renderCertificateToCanvas = useCallback(
     (targetCanvas: HTMLCanvasElement, customWidth?: number, customHeight?: number) => {
       const ctx = targetCanvas.getContext('2d');
-      if (!ctx) return;
-
       const img = imageRef.current;
-      const naturalW = img?.naturalWidth || 1448;
-      const naturalH = img?.naturalHeight || 1086;
-
-      const w = customWidth || naturalW;
-      const h = customHeight || naturalH;
-
-      if (targetCanvas.width !== w || targetCanvas.height !== h) {
-        targetCanvas.width = w;
-        targetCanvas.height = h;
-      }
-
-      const scaleX = w / 1448;
-      const scaleY = h / 1086;
-
-      ctx.clearRect(0, 0, w, h);
+      if (!ctx || !img?.complete || !img.naturalWidth) return;
+      const w = customWidth || img.naturalWidth;
+      const h = customHeight || img.naturalHeight;
+      targetCanvas.width = w;
+      targetCanvas.height = h;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-
-      if (img && img.complete && img.naturalWidth > 0) {
-        ctx.drawImage(img, 0, 0, w, h);
-      } else {
-        // Fallback official background
-        ctx.fillStyle = '#fdfbfb';
-        ctx.fillRect(0, 0, w, h);
-
-        // Certificate decorative borders
-        ctx.strokeStyle = '#5a0f18';
-        ctx.lineWidth = Math.round(12 * scaleY);
-        ctx.strokeRect(36 * scaleX, 36 * scaleY, w - 72 * scaleX, h - 72 * scaleY);
-
-        ctx.strokeStyle = '#b45309';
-        ctx.lineWidth = Math.round(3 * scaleY);
-        ctx.strokeRect(48 * scaleX, 48 * scaleY, w - 96 * scaleX, h - 96 * scaleY);
-
-        // Header fallback text
-        ctx.fillStyle = '#5a0f18';
-        ctx.font = `bold ${Math.round(34 * scaleY)}px "Plus Jakarta Sans", sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillText('KOMISI PEMILIHAN UMUM KABUPATEN KONAWE', w / 2, Math.round(170 * scaleY));
-
-        ctx.font = `bold ${Math.round(64 * scaleY)}px "Playfair Display", serif`;
-        ctx.fillText('SERTIFIKAT', w / 2, Math.round(310 * scaleY));
-
-        ctx.font = `500 ${Math.round(20 * scaleY)}px "Plus Jakarta Sans", sans-serif`;
-        ctx.fillStyle = '#534344';
-        ctx.fillText('Diberikan kepada:', w / 2, Math.round(460 * scaleY));
-      }
-
-      // Precise typography overlay matching official Indonesian certificate layout
-      const recipientName = name.trim() || 'Nama Lengkap Peserta, Gelar';
-      const recipientSerial = serial.trim();
-
+      ctx.drawImage(img, 0, 0, w, h);
       ctx.save();
+      ctx.scale(w / 1152, h / 768);
+
+      const recipientName = name.trim() || 'Nama Lengkap Peserta, Gelar';
       ctx.textAlign = 'center';
-
-      // 1. Dynamic Font Scaling for Recipient's Name
-      let fontSize = Math.round(38 * scaleY);
-      if (recipientName.length > 38) {
-        fontSize = Math.round(28 * scaleY);
-      } else if (recipientName.length > 28) {
-        fontSize = Math.round(32 * scaleY);
-      }
-
-      // Official Deep Maroon/Burgundy matching the certificate identity
-      ctx.font = `bold ${fontSize}px "Playfair Display", Georgia, serif`;
       ctx.fillStyle = '#520b12';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
-      ctx.shadowBlur = Math.round(4 * scaleY);
-      ctx.shadowOffsetY = Math.round(2 * scaleY);
+      // Fit the measured name between the ends of the gold rule, including long titles.
+      let fontSize = 30;
+      ctx.font = `bold ${fontSize}px Georgia, serif`;
+      while (ctx.measureText(recipientName).width > 490 && fontSize > 10) {
+        fontSize -= 1;
+        ctx.font = `bold ${fontSize}px Georgia, serif`;
+      }
+      ctx.fillText(recipientName, 576, 377, 490);
 
-      // Draw Recipient Name positioned directly above the gold line below "Diberikan Kepada"
-      // The gold line is at y = 554 (scaled). Placing baseline at y = 538 provides precise optical alignment
-      ctx.fillText(recipientName, w / 2, Math.round(538 * scaleY));
-      ctx.restore();
-
-      // 2. Serial Number Overlay - Dituliskan tepat setelah tulisan "Nomor :" yang berada di bawah tulisan "Sertifikat"
-      // Sesuai instruksi: letakkan nomor registrasi sertifikat "xxx/HM.07/7402/2/2026" tepat setelah tulisan "Nomor :",
-      // dan tidak perlu melakukan pengulangan menulis "Nomor :" di depannya
-      if (recipientSerial) {
-        ctx.save();
-        let cleanSerial = recipientSerial.trim();
-        // Bersihkan prefix jika pengguna atau form memasukkan "Nomor :" atau "No. :" secara manual
-        if (/^(no\.?\s*reg\.?:?|nomor\s*:?|no\.?:?)\s*/i.test(cleanSerial)) {
-          cleanSerial = cleanSerial.replace(/^(no\.?\s*reg\.?:?|nomor\s*:?|no\.?:?)\s*/i, '').trim();
-        }
-
-        ctx.font = `600 ${Math.round(18 * scaleY)}px "Plus Jakarta Sans", monospace, sans-serif`;
-        ctx.fillStyle = '#1c1112';
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-
-        // Koordinat mengikuti template resmi panitia (rasio 4:3, basis 1448 x 1086).
-        // Label "Nomor :" sudah tercetak, jadi hanya nomor registrasi yang ditambahkan.
+      const cleanSerial = serial.trim().replace(/^(no\.?\s*reg\.?:?|nomor\s*:?|no\.?:?)\s*/i, '').trim();
+      if (cleanSerial) {
         ctx.textAlign = 'left';
         ctx.fillStyle = '#1c1112';
-        // Mulai setelah titik dua dengan jarak visual setara dua spasi.
-        ctx.fillText(cleanSerial, Math.round(643 * scaleX), Math.round(398 * scaleY));
-
-        ctx.restore();
+        ctx.font = '500 18px Arial, sans-serif';
+        // The label "Nomor :" is part of the artwork; add only its value.
+        ctx.fillText(cleanSerial, 498, 286, 290);
       }
 
       const qrImage = qrImageRef.current;
-      if (qrImage && recipientSerial) {
-        const qrSize = Math.round(112 * Math.min(scaleX, scaleY));
-        const qrX = Math.round(w - 178 * scaleX);
-        const qrY = Math.round(h - 180 * scaleY);
-        ctx.save();
+      if (qrImage && cleanSerial) {
+        // Clear area to the right of the signature, above the decorative lower edge.
+        const qrX = 805;
+        const qrY = 592;
+        const qrSize = 76;
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(qrX - Math.round(8 * scaleX), qrY - Math.round(8 * scaleY), qrSize + Math.round(16 * scaleX), qrSize + Math.round(34 * scaleY));
+        ctx.fillRect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 24);
         ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
         ctx.fillStyle = '#520b12';
-        ctx.font = `600 ${Math.round(9 * scaleY)}px "Plus Jakarta Sans", sans-serif`;
+        ctx.font = 'bold 8px Arial, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('VERIFIKASI', qrX + qrSize / 2, qrY + qrSize + Math.round(16 * scaleY));
-        ctx.restore();
+        ctx.fillText('VERIFIKASI', qrX + qrSize / 2, qrY + qrSize + 13);
       }
+      ctx.restore();
     },
     [name, serial]
   );
@@ -371,17 +291,17 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle Ultra-HD JPG Download (rendered at 2x master resolution)
   const handleDownloadJPG = () => {
-    if (!canDownload || !isQrReady) {
+    if (!canDownload || !isQrReady || !templateLoaded) {
       onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan JPG dapat dibuka.', 'warning');
       return;
     }
 
     try {
       const img = imageRef.current;
-      const naturalW = img?.naturalWidth || 1448;
-      const naturalH = img?.naturalHeight || 1086;
+      const naturalW = img?.naturalWidth || 1152;
+      const naturalH = img?.naturalHeight || 768;
 
-      const exportW = Math.max(Math.round(naturalW * 2), 2896);
+      const exportW = Math.max(naturalW, 3508);
       const exportH = Math.round(exportW * (naturalH / naturalW));
 
       const exportCanvas = document.createElement('canvas');
@@ -404,8 +324,8 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
   // Handle True 300 DPI Ultra-HD PDF Generation & Direct Download
   const handleDownloadPDF = async () => {
-    if (isExportingPDF || !canDownload || !isQrReady) {
-      if (!canDownload || !isQrReady) {
+    if (isExportingPDF || !canDownload || !isQrReady || !templateLoaded) {
+      if (!canDownload || !isQrReady || !templateLoaded) {
         onShowToast('Sertifikat Belum Tersedia', 'Selesaikan presensi terlebih dahulu agar unduhan PDF dapat dibuka.', 'warning');
       }
       return;
@@ -414,7 +334,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
     onShowToast(
       'Merender PDF Ultra HD (300 DPI)...',
-      'Sedang menyusun sertifikat vektor beresolusi tinggi untuk dicetak.',
+      'Sedang menyusun sertifikat beresolusi tinggi untuk dicetak.',
       'info'
     );
 
@@ -423,11 +343,11 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
       await new Promise((resolve) => setTimeout(resolve, 40));
 
       const img = imageRef.current;
-      const naturalW = img?.naturalWidth || 1448;
-      const naturalH = img?.naturalHeight || 1086;
+      const naturalW = img?.naturalWidth || 1152;
+      const naturalH = img?.naturalHeight || 768;
 
-      // Render at print-ready resolution while preserving the original 4:3 artwork.
-      const exportW = Math.max(Math.round(naturalW * 1.6), 3508);
+      // Render at print-ready resolution while preserving the original artwork.
+      const exportW = Math.max(naturalW, 3508);
       const exportH = Math.round(exportW * (naturalH / naturalW));
 
       // Offscreen ultra-high definition canvas
@@ -437,12 +357,11 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
       // Generate pristine quality image stream (JPEG 0.98 for fast, artifact-free high-density rendering)
       const imgData = exportCanvas.toDataURL('image/jpeg', 0.98);
 
-      // Use a 4:3 PDF page so the supplied certificate fills the page without
-      // cropping, distortion, or white margins.
+      // Preserve the loaded artwork ratio (3:2 for the latest official PDF).
       const doc = new jsPDF({
-        orientation: 'landscape',
+        orientation: naturalW >= naturalH ? 'landscape' : 'portrait',
         unit: 'mm',
-        format: [297, 222.75],
+        format: [297, 297 * naturalH / naturalW],
         compress: true,
       });
 
@@ -457,7 +376,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         title: `Sertifikat KPU Konawe - ${name || 'Peserta'}`,
         subject: 'Sertifikat Resmi Komisi Pemilihan Umum Kabupaten Konawe',
         author: 'KPU Kabupaten Konawe',
-        keywords: 'sertifikat, kpu, konawe, bimtek, pemilu',
+        keywords: 'sertifikat, kpu, konawe, diskusi kepemiluan, komunikasi politik',
         creator: 'Sistem Cetak E-Sertifikat KPU Konawe',
       });
 
@@ -505,7 +424,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
                 className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-[#f6f1f1] text-[#534344] font-semibold font-mono"
               >
                 <span className="material-symbols-outlined text-[14px] text-[#5a0f18]">verified</span>
-                <span>Template Resmi KPU Konawe HD</span>
+                <span>Diskusi Kepemiluan · 28 Oktober 2026</span>
               </span>
             )}
           </div>
@@ -586,7 +505,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         </div>
 
         {/* Canvas dirender tersembunyi hanya untuk menghasilkan PDF/JPG. */}
-        <canvas ref={canvasRef} id="certCanvas" width={1448} height={1086} className="hidden" />
+        <canvas ref={canvasRef} id="certCanvas" width={1152} height={768} className="hidden" />
 
         {/* Action Buttons Toolbar */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -594,7 +513,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
             <button
               id="btnDownloadPDF"
               type="button"
-              disabled={isExportingPDF || !canDownload || !isQrReady}
+              disabled={isExportingPDF || !canDownload || !isQrReady || !templateLoaded}
               onClick={handleDownloadPDF}
               title={canDownload ? 'Unduh sertifikat dalam format PDF' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5a0f18] hover:bg-[#3d080e] text-white text-xs font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
@@ -602,13 +521,13 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className={`material-symbols-outlined text-[18px] text-[#ffdcc3] ${isExportingPDF ? 'animate-spin' : ''}`}>
                 {isExportingPDF ? 'sync' : 'picture_as_pdf'}
               </span>
-              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload && !isQrReady ? 'Menyiapkan QR...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
+              <span>{isExportingPDF ? 'Memproses PDF...' : canDownload && (!isQrReady || !templateLoaded) ? 'Menyiapkan sertifikat...' : canDownload ? 'PDF' : 'PDF Terkunci'}</span>
             </button>
 
             <button
               id="btnDownloadJPG"
               type="button"
-              disabled={!canDownload || !isQrReady}
+              disabled={!canDownload || !isQrReady || !templateLoaded}
               onClick={handleDownloadJPG}
               title={canDownload ? 'Unduh sertifikat dalam format JPG' : 'Kirim presensi terlebih dahulu untuk membuka unduhan'}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#f6f1f1] hover:bg-[#ede4e4] text-[#201112] text-xs font-semibold transition-all border border-[#d5cbcd]/50 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
@@ -616,7 +535,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
               <span className="material-symbols-outlined text-[18px] text-[#5a0f18]">
                 image
               </span>
-              <span>{canDownload && !isQrReady ? 'Menyiapkan QR...' : canDownload ? 'JPG' : 'JPG Terkunci'}</span>
+              <span>{canDownload && (!isQrReady || !templateLoaded) ? 'Menyiapkan sertifikat...' : canDownload ? 'JPG' : 'JPG Terkunci'}</span>
             </button>
           </div>
 
@@ -628,55 +547,6 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
           </div>
         </div>
       </div>
-
-      {/* Quick Metrics Ribbon */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div
-          id="metric-export-res"
-          className="p-3 bg-white rounded-xl shadow-xs flex items-center gap-3 border border-[#5a0f18]/10"
-        >
-          <div className="w-9 h-9 rounded-lg bg-[#f6f1f1] flex items-center justify-center text-[#5a0f18]">
-            <span className="material-symbols-outlined text-[20px]">high_density</span>
-          </div>
-          <div>
-            <span className="text-[10px] text-[#75777d] uppercase tracking-wider block font-mono">
-              Resolusi Export PDF
-            </span>
-            <span className="text-xs font-bold text-[#5a0f18]">Ultra HD 300 DPI (3508px)</span>
-          </div>
-        </div>
-
-        <div
-          id="metric-institution"
-          className="p-3 bg-white rounded-xl shadow-xs flex items-center gap-3 border border-[#5a0f18]/10"
-        >
-          <div className="w-9 h-9 rounded-lg bg-[#f6f1f1] flex items-center justify-center text-[#5a0f18]">
-            <span className="material-symbols-outlined text-[20px]">account_balance</span>
-          </div>
-          <div>
-            <span className="text-[10px] text-[#75777d] uppercase tracking-wider block font-mono">
-              Lembaga
-            </span>
-            <span className="text-xs font-bold text-[#5a0f18]">KPU Kab. Konawe</span>
-          </div>
-        </div>
-
-        <div
-          id="metric-duration"
-          className="p-3 bg-white rounded-xl shadow-xs flex items-center gap-3 border border-[#5a0f18]/10"
-        >
-          <div className="w-9 h-9 rounded-lg bg-[#f6f1f1] flex items-center justify-center text-[#5a0f18]">
-            <span className="material-symbols-outlined text-[20px]">schedule</span>
-          </div>
-          <div>
-            <span className="text-[10px] text-[#75777d] uppercase tracking-wider block font-mono">
-              Beban Kegiatan
-            </span>
-            <span className="text-xs font-bold text-[#5a0f18]">2 Jam Pelajaran</span>
-          </div>
-        </div>
-      </div>
-
     </div>
   );
 });

@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, isAdmin, onSelectTa
           </span>
         </div>
         <p className="text-xs text-[#534344] leading-relaxed">
-          Verifikasi otomatis e-sertifikat peserta bedah buku kepemiluan.
+          Verifikasi otomatis e-sertifikat peserta diskusi kepemiluan.
         </p>
 
         {isAdmin && (

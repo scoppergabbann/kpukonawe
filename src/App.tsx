@@ -61,7 +61,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAttendanceConfirmation, setShowAttendanceConfirmation] = useState(false);
   const submitInFlightRef = useRef(false);
-  const date = '8 September 2026';
+  const date = '28 Oktober 2026';
 
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [publicRecords, setPublicRecords] = useState<PublicAttendanceRecord[]>([]);
