@@ -45,7 +45,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   const qrImageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const DEFAULT_TEMPLATE_URL = '/certificate-diskusi-kepemiluan-2026-10-28.jpg';
+  const DEFAULT_TEMPLATE_URL = '/certificate-diskusi-kepemiluan-2026-10-28-v2.jpg';
 
   const loadTemplateFromSource = useCallback((src: string, isCustom = false, fileName = '') => {
     setTemplateLoaded(false);
@@ -235,11 +235,11 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
       const cleanSerial = serial.trim().replace(/^(no\.?\s*reg\.?:?|nomor\s*:?|no\.?:?)\s*/i, '').trim();
       if (cleanSerial) {
-        ctx.textAlign = 'left';
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#1c1112';
         ctx.font = '500 18px Arial, sans-serif';
-        // The label "Nomor :" is part of the artwork; add only its value.
-        ctx.fillText(cleanSerial, 498, 288, 290);
+        // Center the complete label and generated serial as one line on the new artwork.
+        ctx.fillText(`Nomor: ${cleanSerial}`, 576, 295, 490);
       }
 
       const qrImage = qrImageRef.current;

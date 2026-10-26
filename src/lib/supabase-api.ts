@@ -214,14 +214,14 @@ export async function signOutAdmin() { await supabase.auth.signOut(); }
 
 export async function downloadCertificateTemplate(): Promise<{ url: string; name: string } | null> {
   if (!isSupabaseConfigured) return null;
-  const { data, error } = await supabase.storage.from('certificate-templates').download('diskusi-kepemiluan-2026-10-28');
+  const { data, error } = await supabase.storage.from('certificate-templates').download('diskusi-kepemiluan-2026-10-28-v2');
   if (error || !data) return null;
   return { url: URL.createObjectURL(data), name: 'Template Supabase' };
 }
 
 export async function uploadCertificateTemplate(blob: Blob) {
   requireConfiguration();
-  const { error } = await supabase.storage.from('certificate-templates').upload('diskusi-kepemiluan-2026-10-28', blob, {
+  const { error } = await supabase.storage.from('certificate-templates').upload('diskusi-kepemiluan-2026-10-28-v2', blob, {
     upsert: true, contentType: blob.type || 'image/jpeg', cacheControl: '0',
   });
   if (error) throw error;
@@ -229,6 +229,6 @@ export async function uploadCertificateTemplate(blob: Blob) {
 
 export async function resetCertificateTemplate() {
   requireConfiguration();
-  const { error } = await supabase.storage.from('certificate-templates').remove(['diskusi-kepemiluan-2026-10-28']);
+  const { error } = await supabase.storage.from('certificate-templates').remove(['diskusi-kepemiluan-2026-10-28-v2']);
   if (error && !/not found/i.test(error.message)) throw error;
 }
