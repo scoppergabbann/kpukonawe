@@ -178,6 +178,7 @@ export default function App() {
   }, []);
 
   const handleRequestSubmitPresensi = () => {
+    if (submitInFlightRef.current) return;
     setShowAttendanceConfirmation(true);
   };
 
@@ -186,6 +187,8 @@ export default function App() {
     if (submitInFlightRef.current) return;
     submitInFlightRef.current = true;
     setIsSubmitting(true);
+    // Dismiss confirmation immediately; the form displays the sending state.
+    setShowAttendanceConfirmation(false);
 
     try {
       const newRecord = await submitAttendance({
@@ -196,7 +199,6 @@ export default function App() {
       });
       setSerial(newRecord.serial);
       setIssuedRecord(newRecord);
-      setShowAttendanceConfirmation(false);
       setParticipantCount((count) => count + 1);
       setPublicRecords((current) => [
         { id: newRecord.id, name: newRecord.name, instansi: newRecord.instansi, serial: newRecord.serial },
