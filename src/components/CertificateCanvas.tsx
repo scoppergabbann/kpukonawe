@@ -235,11 +235,25 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
 
       const cleanSerial = serial.trim().replace(/^(no\.?\s*reg\.?:?|nomor\s*:?|no\.?:?)\s*/i, '').trim();
       if (cleanSerial) {
-        ctx.textAlign = 'center';
+        ctx.save();
         ctx.fillStyle = '#1c1112';
-        ctx.font = '500 18px Arial, sans-serif';
-        // Center the complete label and generated serial as one line on the new artwork.
-        ctx.fillText(`Nomor: ${cleanSerial}`, 576, 295, 490);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        const serialLabel = `Nomor: ${cleanSerial}`;
+        let serialFontSize = 18;
+        ctx.font = `500 ${serialFontSize}px Arial, sans-serif`;
+        while (ctx.measureText(serialLabel).width > 490 && serialFontSize > 10) {
+          serialFontSize -= 1;
+          ctx.font = `500 ${serialFontSize}px Arial, sans-serif`;
+        }
+        // Align the visible text bounds with the artwork's center, at every export size.
+        const metrics = ctx.measureText(serialLabel);
+        const centerX = 576;
+        const centerY = 288;
+        const textX = centerX + (metrics.actualBoundingBoxLeft - metrics.actualBoundingBoxRight) / 2;
+        const textY = centerY + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2;
+        ctx.fillText(serialLabel, textX, textY);
+        ctx.restore();
       }
 
       const qrImage = qrImageRef.current;

@@ -32,7 +32,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
               Presensi Daring Aktif
             </span>
             <span className="text-sm text-[#534344] font-medium">
-              Kabupaten Konawe • Durasi 2 Jam Pelajaran
+              Kabupaten Konawe
             </span>
           </div>
 

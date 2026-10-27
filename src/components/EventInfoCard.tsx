@@ -47,21 +47,6 @@ export const EventInfoCard: React.FC = () => {
             </span>
           </div>
         </div>
-
-        <div className="p-3 rounded-xl bg-[#f6f1f1] flex items-start gap-3 border border-[#f0e6e7]">
-          <span className="material-symbols-outlined text-[#5a0f18] text-[20px] shrink-0 mt-0.5">
-            timer
-          </span>
-          <div>
-            <strong className="text-[#201112] block font-semibold text-sm">
-              Beban Pembelajaran Resmi
-            </strong>
-            <span className="text-sm text-[#534344] leading-relaxed">
-              Setara 2 (dua) jam pelajaran bersertifikat resmi KPU Konawe ditandatangani
-              Ketua KPU (Wike).
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );
