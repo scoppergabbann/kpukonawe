@@ -8,13 +8,13 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
   return (
     <div
       id="hero-event-banner"
-      className="relative w-full rounded-2xl bg-white p-6 sm:p-8 shadow-sm overflow-hidden mb-6 border border-[#5a0f18]/10"
+      className="relative w-full rounded-2xl bg-white p-4 sm:p-8 shadow-sm overflow-hidden mb-6 border border-[#5a0f18]/10"
     >
       {/* Decorative ambient blurs */}
       <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-[#5a0f18]/5 blur-3xl pointer-events-none" />
       <div className="absolute right-1/4 -bottom-20 w-64 h-64 rounded-full bg-[#ffdcc3]/20 blur-2xl pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="relative z-10 flex min-w-0 flex-col gap-6">
         <div className="max-w-3xl">
           {/* Metadata chips */}
           <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -57,21 +57,21 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
         </div>
 
         {/* Quick Stat Tiles */}
-        <div className="flex flex-col items-stretch gap-3 pt-2 min-[360px]:flex-row min-[360px]:items-center sm:gap-4 lg:pt-0 lg:shrink-0">
+        <div className="grid w-full min-w-0 grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-4">
           <div
             id="stat-registered-attendees"
-            className="p-3.5 bg-[#f6f1f1] rounded-xl flex items-center gap-3 border border-[#5a0f18]/10 shadow-xs"
+            className="min-w-0 p-4 bg-[#f6f1f1] rounded-xl flex items-center gap-3 border border-[#5a0f18]/10 shadow-xs"
           >
-            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-[#5a0f18] shadow-xs">
+            <div className="w-11 h-11 shrink-0 rounded-lg bg-white flex items-center justify-center text-[#5a0f18] shadow-xs">
               <span className="material-symbols-outlined text-[22px]">group</span>
             </div>
-            <div>
-              <span className="text-sm uppercase font-bold tracking-wider text-[#67585b] block font-mono">
+            <div className="min-w-0 flex-1">
+              <span className="text-sm font-semibold leading-relaxed text-[#67585b] block">
                 Peserta Terdaftar
               </span>
               <span
                 id="totalAttendanceBadge"
-                className="text-xl font-bold text-[#5a0f18] tracking-tight font-mono"
+                className="mt-1 block break-words text-xl leading-snug font-bold text-[#5a0f18] tracking-tight font-mono"
               >
                 {attendeeCount}
               </span>
@@ -80,16 +80,16 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ attendeeCount }) => {
 
           <div
             id="stat-issuance-status"
-            className="p-3.5 bg-[#5a0f18]/10 rounded-xl flex items-center gap-3 border border-[#5a0f18]/20 shadow-xs"
+            className="min-w-0 p-4 bg-[#5a0f18]/10 rounded-xl flex items-center gap-3 border border-[#5a0f18]/20 shadow-xs"
           >
-            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-[#5a0f18] shadow-xs">
+            <div className="w-11 h-11 shrink-0 rounded-lg bg-white flex items-center justify-center text-[#5a0f18] shadow-xs">
               <span className="material-symbols-outlined text-[22px]">verified</span>
             </div>
-            <div>
-              <span className="text-sm uppercase font-bold tracking-wider text-[#5a0f18] block font-mono">
+            <div className="min-w-0 flex-1">
+              <span className="text-sm font-semibold leading-relaxed text-[#5a0f18] block">
                 Status Penerbitan
               </span>
-              <span className="text-xl font-bold text-[#5a0f18] tracking-tight">
+              <span className="mt-1 block break-words text-xl leading-snug font-bold text-[#5a0f18] tracking-tight">
                 Resmi KPU
               </span>
             </div>
