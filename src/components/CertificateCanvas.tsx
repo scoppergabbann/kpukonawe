@@ -241,15 +241,15 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         ctx.textBaseline = 'alphabetic';
         const serialLabel = `Nomor: ${cleanSerial}`;
         let serialFontSize = 18;
-        ctx.font = `500 ${serialFontSize}px Arial, sans-serif`;
+        ctx.font = `bold ${serialFontSize}px Arial, sans-serif`;
         while (ctx.measureText(serialLabel).width > 490 && serialFontSize > 10) {
           serialFontSize -= 1;
-          ctx.font = `500 ${serialFontSize}px Arial, sans-serif`;
+          ctx.font = `bold ${serialFontSize}px Arial, sans-serif`;
         }
         // Align the visible text bounds with the artwork's center, at every export size.
         const metrics = ctx.measureText(serialLabel);
         const centerX = 576;
-        const centerY = 288;
+        const centerY = 281;
         const textX = centerX + (metrics.actualBoundingBoxLeft - metrics.actualBoundingBoxRight) / 2;
         const textY = centerY + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2;
         ctx.fillText(serialLabel, textX, textY);
