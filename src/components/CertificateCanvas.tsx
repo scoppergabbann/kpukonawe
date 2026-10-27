@@ -40,7 +40,8 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   const [customTemplateName, setCustomTemplateName] = useState<string>('');
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isQrReady, setIsQrReady] = useState(false);
-  const isCertificateReady = templateLoaded && (!CERTIFICATE_QR_ENABLED || isQrReady);
+  const [isSerialFontReady, setIsSerialFontReady] = useState(false);
+  const isCertificateReady = templateLoaded && isSerialFontReady && (!CERTIFICATE_QR_ENABLED || isQrReady);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const qrImageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -240,12 +241,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
         const serialLabel = `Nomor: ${cleanSerial}`;
-        let serialFontSize = 18;
-        ctx.font = `bold ${serialFontSize}px Arial, sans-serif`;
-        while (ctx.measureText(serialLabel).width > 490 && serialFontSize > 10) {
-          serialFontSize -= 1;
-          ctx.font = `bold ${serialFontSize}px Arial, sans-serif`;
-        }
+        ctx.font = '700 18px "Montserrat", sans-serif';
         // Align the visible text bounds with the artwork's center, at every export size.
         const metrics = ctx.measureText(serialLabel);
         const centerX = 576;
@@ -302,10 +298,21 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
     });
   }, [drawCertificate, verificationId, serial]);
 
+  // Load the bundled typeface before enabling either certificate download.
+  useEffect(() => {
+    let active = true;
+    void document.fonts.load('700 18px "Montserrat"', 'Nomor: 001/HM.07/7402/2/2026')
+      .then((fonts) => {
+        if (active && fonts.length > 0) setIsSerialFontReady(true);
+      })
+      .catch((error) => console.error('Font Montserrat tidak dapat dimuat.', error));
+    return () => { active = false; };
+  }, []);
+
   // Re-draw whenever inputs or template change
   useEffect(() => {
     drawCertificate();
-  }, [name, serial, templateLoaded, drawCertificate]);
+  }, [name, serial, templateLoaded, isSerialFontReady, drawCertificate]);
 
   // Handle Ultra-HD JPG Download (rendered at 2x master resolution)
   const handleDownloadJPG = () => {
