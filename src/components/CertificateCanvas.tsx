@@ -241,7 +241,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
         const serialLabel = `Nomor: ${cleanSerial}`;
-        ctx.font = '700 18px "Montserrat", sans-serif';
+        ctx.font = '400 18px "Montserrat", sans-serif';
         // Align the visible text bounds with the artwork's center, at every export size.
         const metrics = ctx.measureText(serialLabel);
         const centerX = 576;
@@ -301,7 +301,7 @@ export const CertificateCanvas = React.forwardRef<CertificateCanvasHandle, Certi
   // Load the bundled typeface before enabling either certificate download.
   useEffect(() => {
     let active = true;
-    void document.fonts.load('700 18px "Montserrat"', 'Nomor: 001/HM.07/7402/2/2026')
+    void document.fonts.load('400 18px "Montserrat"', 'Nomor: 001/HM.07/7402/2/2026')
       .then((fonts) => {
         if (active && fonts.length > 0) setIsSerialFontReady(true);
       })
